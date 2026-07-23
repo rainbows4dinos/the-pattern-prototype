@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Pattern — wireframe starter</title>
+<style>
+/* :root synced from design-system/tokens.css. Neutral wireframe kit. */
+:root{
+  --wash:#f4f4f2; --surface:#fff; --surface-sunk:#ececea;
+  --line:#d7d7d3; --line-strong:#b8b8b3;
+  --ink:#1c1c1a; --ink-soft:#6b6b66; --ink-faint:#9a9a95;
+  --accent:#5b6b7a; --accent-ink:#fff;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --text-xs:12px; --text-sm:14px; --text-base:16px; --text-lg:20px; --text-xl:26px; --text-2xl:34px;
+  --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+  --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px;
+  --radius-sm:6px; --radius-md:12px; --radius-lg:20px;
+  --frame-width:390px; --frame-height:844px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#2a2a28;font-family:var(--font);color:var(--ink);
+  display:flex;justify-content:center;align-items:flex-start;padding:24px;min-height:100vh}
+.frame{width:var(--frame-width);height:var(--frame-height);background:var(--wash);
+  border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+  box-shadow:0 8px 40px rgba(0,0,0,.4)}
+
+/* header */
+.top{padding:calc(var(--space-6) + 8px) var(--space-5) var(--space-4);
+  border-bottom:1px solid var(--line);background:var(--surface)}
+.eyebrow{font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:var(--weight-semibold)}
+.title{font-size:var(--text-2xl);font-weight:var(--weight-bold);margin-top:var(--space-2);line-height:1.1}
+
+/* body */
+.body{flex:1;overflow-y:auto;padding:var(--space-5)}
+.label{font-size:var(--text-xs);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:var(--weight-semibold);margin-bottom:var(--space-3)}
+
+/* centerpiece placeholder: one interactive focal object per screen */
+.centerpiece{background:var(--surface);border:1px dashed var(--line-strong);
+  border-radius:var(--radius-lg);height:280px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:var(--space-2);color:var(--ink-faint);
+  margin-bottom:var(--space-5)}
+.centerpiece .ring{width:120px;height:120px;border:2px solid var(--line-strong);
+  border-radius:50%;position:relative}
+.centerpiece .ring::after{content:"";position:absolute;width:14px;height:14px;
+  background:var(--accent);border-radius:50%;top:-8px;left:50%;transform:translateX(-50%)}
+.centerpiece .cap{font-size:var(--text-sm)}
+
+/* generic content blocks */
+.block{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);
+  padding:var(--space-4);margin-bottom:var(--space-3)}
+.line{height:10px;background:var(--surface-sunk);border-radius:var(--radius-sm);margin-bottom:var(--space-2)}
+.line.w80{width:80%}.line.w60{width:60%}.line.w40{width:40%}
+
+/* tab bar */
+.tabs{display:flex;border-top:1px solid var(--line);background:var(--surface)}
+.tab{flex:1;padding:var(--space-3) 0 calc(var(--space-3) + 8px);text-align:center;
+  font-size:var(--text-xs);font-weight:var(--weight-medium);color:var(--ink-faint);
+  cursor:pointer;border:none;background:none;font-family:inherit}
+.tab .ic{font-size:20px;display:block;margin-bottom:2px}
+.tab.on{color:var(--accent)}
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="top">
+      <div class="eyebrow">Wireframe</div>
+      <div class="title" id="screenTitle">Today</div>
+    </div>
+
+    <div class="body">
+      <div class="label">Interactive centerpiece</div>
+      <div class="centerpiece">
+        <div class="ring"></div>
+        <div class="cap">focal object placeholder</div>
+      </div>
+
+      <div class="label">Supporting content</div>
+      <div class="block"><div class="line w80"></div><div class="line w60"></div><div class="line w40"></div></div>
+      <div class="block"><div class="line w60"></div><div class="line w80"></div></div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-t="Today"><span class="ic">◐</span>Today</button>
+      <button class="tab" data-t="Bonds"><span class="ic">◇</span>Bonds</button>
+      <button class="tab" data-t="Timing"><span class="ic">◈</span>Timing</button>
+      <button class="tab" data-t="You"><span class="ic">◉</span>You</button>
+    </div>
+  </div>
+
+<script>
+// Direct style writes, not class toggles, to survive host dark-mode overrides.
+var tabs = document.querySelectorAll('.tab');
+var titleEl = document.getElementById('screenTitle');
+tabs.forEach(function(btn){
+  btn.addEventListener('click', function(){
+    tabs.forEach(function(b){ b.classList.remove('on'); b.style.color = 'var(--ink-faint)'; });
+    btn.classList.add('on'); btn.style.color = 'var(--accent)';
+    titleEl.textContent = btn.getAttribute('data-t');
+  });
+});
+</script>
+</body>
+</html>
