@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Pattern — Static Prototypes</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f5f4f2;
+        --fg: #1c1b1a;
+        --muted: #6f6c69;
+        --line: #dedbd7;
+        --card: #fffefc;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #171614;
+          --fg: #f0eeeb;
+          --muted: #9b9793;
+          --line: #302e2b;
+          --card: #201f1d;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 2.5rem 1.25rem 4rem;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      main { max-width: 34rem; margin: 0 auto; }
+      h1 { font-size: 1.375rem; letter-spacing: -0.01em; margin: 0 0 0.25rem; }
+      p.lede { color: var(--muted); margin: 0 0 2rem; font-size: 0.9375rem; }
+      ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+      a.item {
+        display: block;
+        padding: 1rem 1.125rem;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 0.875rem;
+        color: inherit;
+        text-decoration: none;
+      }
+      a.item:active { opacity: 0.6; }
+      .name { font-weight: 590; letter-spacing: -0.005em; }
+      .file { color: var(--muted); font-size: 0.8125rem; margin-top: 0.1875rem; }
+      footer { color: var(--muted); font-size: 0.8125rem; margin-top: 2.5rem; }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Static Prototypes</h1>
+      <p class="lede">Standalone HTML sketches. Self-contained — no build step, no React.</p>
+      <ul>
+        <li>
+          <a class="item" href="./the-pattern-3d-chart">
+            <div class="name">3D Natal Chart</div>
+            <div class="file">the-pattern-3d-chart.html</div>
+          </a>
+        </li>
+        <li>
+          <a class="item" href="./the-pattern-conveyor-strip">
+            <div class="name">Conveyor + Strip</div>
+            <div class="file">the-pattern-conveyor-strip.html</div>
+          </a>
+        </li>
+      </ul>
+      <footer>&larr; <a href="/">Back to the React prototype</a></footer>
+    </main>
+  </body>
+</html>
