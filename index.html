@@ -47,6 +47,16 @@
       a.item:active { opacity: 0.6; }
       .name { font-weight: 590; letter-spacing: -0.005em; }
       .file { color: var(--muted); font-size: 0.8125rem; margin-top: 0.1875rem; }
+      section { margin-bottom: 2rem; }
+      h2 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        font-weight: 590;
+        margin: 0 0 0.75rem 0.125rem;
+      }
+      h2 .count { text-transform: none; letter-spacing: 0; font-weight: 400; }
       footer { color: var(--muted); font-size: 0.8125rem; margin-top: 2.5rem; }
       footer a { color: inherit; }
     </style>
@@ -55,20 +65,35 @@
     <main>
       <h1>Static Prototypes</h1>
       <p class="lede">Standalone HTML sketches. Self-contained — no build step, no React.</p>
-      <ul>
-        <li>
-          <a class="item" href="/static-prototypes/the-pattern-3d-chart">
-            <div class="name">3D Natal Chart</div>
-            <div class="file">the-pattern-3d-chart.html</div>
-          </a>
-        </li>
-        <li>
-          <a class="item" href="/static-prototypes/the-pattern-conveyor-strip">
-            <div class="name">Conveyor + Strip</div>
-            <div class="file">the-pattern-conveyor-strip.html</div>
-          </a>
-        </li>
-      </ul>
+      <!--
+        Adding a permutation: drop your-journey-interaction-test-00N.html in this
+        folder and copy one <li> below, bumping the number in both the href and
+        the .file line. hrefs must stay absolute — a relative ./name breaks when
+        this page is opened without a trailing slash.
+      -->
+      <section>
+        <h2>Your Journey <span class="count">— interaction tests</span></h2>
+        <ul>
+          <li>
+            <a class="item" href="/static-prototypes/your-journey-interaction-test-001">
+              <div class="name">001 &middot; Conveyor + strip</div>
+              <div class="file">your-journey-interaction-test-001.html</div>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Other</h2>
+        <ul>
+          <li>
+            <a class="item" href="/static-prototypes/the-pattern-3d-chart">
+              <div class="name">3D Natal Chart</div>
+              <div class="file">the-pattern-3d-chart.html</div>
+            </a>
+          </li>
+        </ul>
+      </section>
       <footer>&larr; <a href="/">Back to the React prototype</a></footer>
     </main>
   </body>
