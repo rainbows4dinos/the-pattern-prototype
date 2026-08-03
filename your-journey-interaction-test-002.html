@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Your Pattern — Journey Interaction Test v2</title>
+<style>
+  :root{
+    --bg:#F3EEE4; --card:#FBF8F1; --ink:#2A2320; --mut:#8C8175; --line:#E0D7C8;
+    --lift:#FFFDF7;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;overscroll-behavior-y:none;}
+  #header{position:fixed;top:0;left:0;right:0;z-index:20;overflow:hidden;
+    background:var(--bg);touch-action:none;}
+  #svgWrap{width:100%;height:100%;}
+  #hint{position:absolute;left:0;right:0;bottom:10px;text-align:center;
+    font-size:11.5px;letter-spacing:.03em;color:var(--mut);pointer-events:none;}
+  #density{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;z-index:40;
+    display:flex;gap:2px;background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:3px;}
+  #density button{border:none;background:none;font:inherit;font-size:12px;color:var(--mut);
+    padding:5px 10px;border-radius:999px;cursor:pointer;}
+  #density button.on{background:var(--ink);color:var(--bg);}
+  main{position:relative;z-index:1;}
+  #cardZone{position:relative;height:224px;touch-action:pan-y;overflow:hidden;}
+  .jcard{position:absolute;top:14px;left:50%;width:300px;height:196px;margin-left:-150px;
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:20px;will-change:transform,opacity;}
+  .jcard .ey{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);}
+  .jcard h2{margin:7px 0 0;font-size:23px;font-weight:600;letter-spacing:-.01em;}
+  .jcard h2 .sg{color:var(--mut);font-weight:500;}
+  .jcard p{margin:9px 0 0;font-size:14px;line-height:1.5;color:#5c534b;}
+  .jcard .cta{position:absolute;left:20px;bottom:18px;display:inline-flex;align-items:center;
+    gap:6px;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .jcard .cta .arw{width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;}
+  section.blk{padding:26px 20px 0;}
+  .lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:0 0 4px;}
+  .sublbl{font-size:13px;color:#5c534b;margin:0 0 16px;}
+  #timeline{position:relative;height:96px;margin:6px 0 4px;user-select:none;touch-action:none;}
+  #tlsvg{position:absolute;inset:0;width:100%;height:100%;}
+  #thumb{position:absolute;top:8px;width:2px;height:64px;background:var(--ink);}
+  #thumb::after{content:"";position:absolute;top:-6px;left:-6px;width:14px;height:14px;
+    border-radius:50%;background:var(--ink);}
+  #thumb .today{position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+    font-size:10px;letter-spacing:.14em;color:var(--ink);white-space:nowrap;}
+  #months{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut);
+    letter-spacing:.02em;margin-top:2px;}
+  .trow{display:flex;align-items:flex-start;padding:14px 2px;border-top:1px solid var(--line);cursor:pointer;}
+  .trow:last-child{border-bottom:1px solid var(--line);}
+  .trow .tk{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink);margin:5px 13px 0 0;flex:0 0 auto;}
+  .trow.hot .tk{background:var(--ink);}
+  .trow .m{font-size:14.5px;font-weight:600;}
+  .trow .s{font-size:12.5px;color:var(--mut);margin-top:2px;}
+  .trow .d{margin-left:auto;font-size:11.5px;color:var(--mut);padding-left:12px;white-space:nowrap;}
+  .foot{padding:22px 20px 150px;font-size:11.5px;line-height:1.6;color:var(--mut);}
+  .foot .ref{margin-top:14px;padding:16px;border:1px dashed var(--line);border-radius:14px;
+    text-align:center;color:#5c534b;font-size:13.5px;}
+  @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+  <div id="density">
+    <button data-n="3">3</button>
+    <button data-n="6">6</button>
+    <button data-n="10" class="on">10</button>
+  </div>
+
+  <div id="header"><div id="svgWrap"></div><div id="hint">swipe to travel the path · scroll to collapse</div></div>
+
+  <main>
+    <div id="cardZone"></div>
+
+    <section class="blk">
+      <div class="lbl">Transits</div>
+      <div class="sublbl">Scrub time. Watch your Pattern lift above.</div>
+      <div id="timeline">
+        <svg id="tlsvg" viewBox="0 0 340 96" preserveAspectRatio="none"></svg>
+        <div id="thumb"><div class="today">NOW</div></div>
+      </div>
+      <div id="months"></div>
+      <div id="trows"></div>
+    </section>
+
+    <section class="foot">
+      Feel test: The Journey as a path. Origin (Moon) sits near and low; the path winds away and rises
+      toward the dawn at the horizon, where the Ascendant is rising. Swipe to travel it; it loops, so the
+      end turns into the next revolution. Scrub the timeline and a transit pulls its node down under the
+      weight of the transiting body. No color carries meaning. Sample chart (Donna), illustrative.
+      <div class="ref">Full chart ◎ &nbsp; (reference layer lives here)</div>
+    </section>
+  </main>
+
+<script>
+"use strict";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+
+const DEF={
+ moon:{g:"\u263D",n:"Moon",s:"Gemini",r:"Emotions & inner world",k:"planet"},
+ ic:{g:"IC",n:"Imum Coeli",s:"Libra",r:"Roots & foundation",k:"angle"},
+ mercury:{g:"\u263F",n:"Mercury",s:"Cancer",r:"Mind & communication",k:"planet"},
+ venus:{g:"\u2640",n:"Venus",s:"Gemini",r:"Love & values",k:"planet"},
+ dsc:{g:"DC",n:"Descendant",s:"Capricorn",r:"Partnership & the other",k:"angle"},
+ mars:{g:"\u2642",n:"Mars",s:"Virgo",r:"Drive & action",k:"planet"},
+ jupiter:{g:"\u2643",n:"Jupiter",s:"Virgo",r:"Growth & expansion",k:"planet"},
+ saturn:{g:"\u2644",n:"Saturn",s:"Gemini",r:"Structure & limits",k:"planet"},
+ mc:{g:"MC",n:"Midheaven",s:"Aries",r:"Purpose & calling",k:"angle"},
+ asc:{g:"AC",n:"Ascendant",s:"Cancer",r:"Destiny & becoming",k:"angle"},
+ neptune:{g:"\u2646",n:"Neptune",s:"Sagittarius",r:"Imagination & dissolution",k:"planet"},
+ uranus:{g:"\u2645",n:"Uranus",s:"Libra",r:"Awakening & change",k:"planet"},
+ pluto:{g:"\u2647",n:"Pluto",s:"Libra",r:"Transformation",k:"planet"},
+ chiron:{g:"\u26B7",n:"Chiron",s:"Aries",r:"The wound & the healer",k:"planet"},
+ vesta:{g:"\u26B6",n:"Vesta",s:"Taurus",r:"Devotion & focus",k:"planet"},
+ sm:{g:"\u2644",n:"Saturn\u2013Moon",s:"",r:"Complex",k:"cx"},
+ pm:{g:"\u2647",n:"Pluto\u2013Mercury",s:"",r:"Complex",k:"cx"},
+ sv:{g:"\u2644",n:"Saturn\u2013Venus",s:"",r:"Complex",k:"cx"},
+ nv:{g:"\u2646",n:"Neptune\u2013Venus",s:"",r:"Complex",k:"cx"},
+ um:{g:"\u2645",n:"Uranus\u2013Moon",s:"",r:"Complex",k:"cx"}
+};
+const SETS={
+ 3:["moon","venus","asc"],
+ 6:["moon","mercury","venus","mars","mc","asc"],
+ 10:["moon","ic","mercury","venus","dsc","mars","jupiter","saturn","mc","asc"]
+};
+const TRANSITS=[
+ {node:"mc",label:"Saturn conjunct Midheaven",sub:"Commitment to your path",peak:0.30},
+ {node:"jupiter",label:"South Node conjunct Jupiter",sub:"Release what no longer grows you",peak:0.36},
+ {node:"moon",label:"Uranus conjunct Moon",sub:"A year of awakening",peak:0.47},
+ {node:"venus",label:"Neptune square Venus",sub:"Idealism around what you value",peak:0.64},
+ {node:"asc",label:"Pluto trine Ascendant",sub:"Realign with who you're becoming",peak:0.79}
+];
+const MONTHS=["Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"];
+
+let SETN=10, IDS=SETS[SETN].slice(), M=IDS.length;
+let journey=0, playhead=0.40;
+let H0=440, STRIP_H=94, COLLAPSE=346;
+
+const header=document.getElementById("header");
+const svgWrap=document.getElementById("svgWrap");
+const cardZone=document.getElementById("cardZone");
+
+function sizes(){
+  H0=Math.round(Math.min(window.innerHeight*0.64, 540));
+  COLLAPSE=H0-STRIP_H;
+  document.querySelector("main").style.paddingTop=H0+"px";
+}
+
+function activation(id,h){
+  let a=0;
+  for(const t of TRANSITS){ if(t.node!==id) continue;
+    const x=(h-t.peak)*7.2; a=Math.max(a, Math.exp(-x*x)); }
+  return a;
+}
+
+// shortest signed offset of node i from focal, wrapped around the loop
+function woff(i){ let d=(i-journey)%M; if(d>M/2)d-=M; if(d<-M/2)d+=M; return d; }
+
+// ---- wheel / strip render ----
+// map a continuous offset s (distance ahead/behind focal) to a point on a
+// screen-space spiral: it winds inward to the horizon eye (ahead / becoming)
+// and outward into the big foreground loop (behind / origin).
+function spiralPt(s, W){
+  const TURN=0.86, GROW=1.32;
+  const Yeye=H0*0.20;
+  const R0=Math.min(H0*0.34, W*0.44);
+  const R=R0*Math.pow(GROW,-s);
+  const ang=s*TURN;
+  const x=W/2 + R*Math.sin(ang);
+  const y=Yeye + R*Math.cos(ang);
+  const scale=clamp(R/R0, 0.15, 1.3);
+  const Rmin=R0*0.12;
+  let op=clamp((R-Rmin*0.5)/(Rmin*0.9),0,1);   // fade as it converges into the eye
+  op*=clamp((H0+40 - y)/48,0,1);                // fade as it drops off the bottom
+  op*=clamp((y+26)/38,0,1);                     // fade above the top edge
+  return {x,y,scale,R,op};
+}
+
+function drawWheel(scrollY){
+  const W=header.clientWidth;
+  const headerH=H0-Math.min(scrollY,COLLAPSE);
+  header.style.height=headerH+"px";
+  const p=clamp(scrollY/COLLAPSE,0,1);
+  const pE=ease(p);
+  document.getElementById("hint").style.opacity=clamp(1-p*2.4,0,1);
+
+  const cx=W/2;
+  const stripY=STRIP_H*0.46, STRIP_SP=52, BASER=30, PULL=22;
+  const VPy=H0*0.20;
+
+  // compute nodes first (need per-node blur before building defs)
+  const items=[];
+  for(let i=0;i<M;i++){
+    const d=woff(i);
+    const sp=spiralPt(d,W);
+
+    // strip target
+    const sx=cx+d*STRIP_SP, sy=stripY;
+    const stripScale=lerp(0.66,0.92,clamp(1-Math.abs(d)*0.6,0,1));
+    const edge=Math.abs(sx-cx)-(W/2-26);
+    const stripOp=clamp(1-Math.max(0,edge)/34,0,1);
+
+    const X=lerp(sp.x,sx,pE);
+    let Y=lerp(sp.y,sy,pE);
+    let sc=lerp(sp.scale,stripScale,pE);
+    let op=lerp(sp.op,stripOp,pE);
+    // foreground nodes past the focal fade as they blur; sharp and full in the strip
+    if(d<0) op*=lerp(clamp(1-(-d-0.5)/2.2,0,1),1,pE);
+    if(op<0.02) continue;
+
+    const act=activation(IDS[i],playhead);
+    Y+=act*PULL*(0.32+0.68*p)*lerp(sp.scale,1,pE);
+    sc*=(1+act*0.15);
+
+    // depth of field: nodes past the focal into the foreground loop (d<0) go soft
+    let blur = d<0 ? clamp(-d*2.5,0,5.5) : clamp((d-3.4)*0.7,0,1.8);
+    if(act>0.2) blur*=0.3;      // an activated node pulls into focus
+    blur*=(1-pE);               // the strip is all sharp
+
+    items.push({i,X,Y,sc,op,act,R:sp.R,d,blur});
+  }
+  // paint inner/far first, outer/near on top
+  items.sort((u,v)=>u.R-v.R);
+
+  // defs: glow, dawn, and one blur filter per soft node
+  let defs=`<filter id="gl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>`+
+    `<radialGradient id="dawn" cx="50%" cy="${(VPy/headerH*100).toFixed(1)}%" r="60%">`+
+    `<stop offset="0%" stop-color="#FFFDF6" stop-opacity="0.95"/>`+
+    `<stop offset="45%" stop-color="#FBF4E6" stop-opacity="0.4"/>`+
+    `<stop offset="100%" stop-color="#FBF4E6" stop-opacity="0"/></radialGradient>`;
+  for(const it of items){ if(it.blur>0.15) defs+=`<filter id="bl${it.i}" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="${it.blur.toFixed(2)}"/></filter>`; }
+
+  let s=`<svg width="100%" height="${headerH}" viewBox="0 0 ${W} ${headerH}" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>`;
+
+  // dawn at the horizon (value, not hue) — fades as it collapses to the strip
+  const dawnOp=(1-pE);
+  if(dawnOp>0.02) s+=`<rect x="0" y="0" width="${W}" height="${headerH}" fill="url(#dawn)" opacity="${dawnOp}"/>`;
+
+  // the journey path: the winding spiral, foreground loop out to the horizon eye
+  const pathOp=(1-pE)*0.5;
+  if(pathOp>0.02){
+    let pts="";
+    for(let sMp=-2.6; sMp<=7.5; sMp+=0.1){
+      const pt=spiralPt(sMp,W);
+      if(pt.op<0.01) continue;
+      pts+=(pts?" L":"M")+pt.x.toFixed(1)+","+pt.y.toFixed(1);
+    }
+    s+=`<path d="${pts}" fill="none" stroke="var(--mut)" stroke-width="1.4" stroke-linecap="round" opacity="${pathOp}"/>`;
+  }
+
+  // strip rail (fades in)
+  const railOp=clamp((p-0.55)/0.45,0,1)*0.9;
+  if(railOp>0.01){
+    s+=`<line x1="20" y1="${stripY}" x2="${W-20}" y2="${stripY}" stroke="var(--line)" stroke-width="1.5" opacity="${railOp}"/>`;
+  }
+
+  for(const it of items){
+    const id=IDS[it.i], def=DEF[id];
+    const r=BASER*it.sc;
+    const fo = it.blur>0.15 ? ` filter="url(#bl${it.i})"` : "";
+    if(it.act>0.03){
+      s+=`<circle cx="${it.X}" cy="${it.Y}" r="${r*1.85}" fill="var(--lift)" opacity="${it.act*0.75}" filter="url(#gl)"/>`;
+    }
+    if(def.k==="angle"){
+      s+=`<g${fo}><circle cx="${it.X}" cy="${it.Y}" r="${r}" fill="var(--bg)" stroke="var(--ink)" stroke-width="${1.8*it.sc}" opacity="${it.op}"/>`+glyph(def.g,it.X,it.Y,r*0.8,"var(--ink)",it.op)+`</g>`;
+    }else if(def.k==="cx"){
+      s+=`<g${fo}><circle cx="${it.X}" cy="${it.Y}" r="${r*0.5}" fill="var(--mut)" opacity="${it.op*0.9}"/></g>`;
+    }else{
+      s+=`<g${fo}><circle cx="${it.X}" cy="${it.Y}" r="${r}" fill="var(--ink)" opacity="${it.op}"/>`+glyph(def.g,it.X,it.Y,r*1.02,"var(--bg)",it.op)+`</g>`;
+    }
+    if(def.s && Math.abs(it.d)<1.35 && it.blur<1){
+      const lop=clamp((1-Math.abs(it.d)/1.35),0,1)*clamp(1-pE*2.2,0,1);
+      if(lop>0.03){
+        s+=`<text x="${it.X}" y="${it.Y+r+15}" text-anchor="middle" font-size="11" fill="var(--mut)" opacity="${lop}" font-family="-apple-system,sans-serif" letter-spacing="0.4">${def.s.toUpperCase()}</text>`;
+      }
+    }
+  }
+  s+=`</svg>`;
+  svgWrap.innerHTML=s;
+}
+function glyph(g,x,y,size,fill,op){
+  const fs=g.length>1?size*0.82:size*1.02;
+  return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="600" fill="${fill}" opacity="${op}" font-family="-apple-system,sans-serif">${g}</text>`;
+}
+
+// ---- cards ----
+function buildCards(){
+  cardZone.innerHTML="";
+  for(let i=0;i<M;i++){
+    const def=DEF[IDS[i]];
+    const el=document.createElement("div");
+    el.className="jcard";
+    const sg=def.s?` <span class="sg">in ${def.s}</span>`:"";
+    el.innerHTML=`<div class="ey">${def.r}</div>`+
+      `<h2>${def.n}${sg}</h2>`+
+      `<p>${cardCopy(def)}</p>`+
+      `<span class="cta">Explore <span class="arw">&rsaquo;</span></span>`;
+    cardZone.appendChild(el);
+  }
+}
+function cardCopy(def){
+  if(def.k==="cx") return "A defining tension in your chart. Read how these two forces meet.";
+  if(def.k==="angle") return "An orientation point of your chart. Where your Pattern turns.";
+  return "Your personal insight, education, and Go Deeper audio, gathered in one place.";
+}
+function layoutCards(){
+  const kids=cardZone.children, W=cardZone.clientWidth;
+  const step=Math.min(W-24, 316);
+  for(let i=0;i<kids.length;i++){
+    const off=woff(i);
+    const tx=off*step;
+    const ax=Math.min(Math.abs(off),1);
+    const sc=1-ax*0.07;
+    const op=Math.abs(off)>1.6?0:1-ax*0.55;
+    const k=kids[i];
+    k.style.transform=`translateX(${tx}px) scale(${sc})`;
+    k.style.opacity=op;
+    k.style.zIndex=Math.round(100-Math.abs(off)*10);
+    k.style.pointerEvents=Math.abs(off)<0.5?"auto":"none";
+  }
+}
+
+// ---- timeline ----
+function buildTimeline(){
+  const mo=document.getElementById("months");
+  mo.innerHTML=MONTHS.map(m=>`<span>${m}</span>`).join("");
+  // energy curve = summed activation across visible nodes
+  const tl=document.getElementById("tlsvg");
+  const pts=[];
+  for(let k=0;k<=68;k++){
+    const h=k/68; let sum=0;
+    for(const t of TRANSITS){ if(!IDS.includes(t.node)) continue;
+      const x=(h-t.peak)*7.2; sum+=Math.exp(-x*x); }
+    pts.push([h*340, 78-Math.min(sum,2.2)*26]);
+  }
+  let path=`M0,88 L0,${pts[0][1].toFixed(1)}`;
+  for(const pt of pts) path+=` L${pt[0].toFixed(1)},${pt[1].toFixed(1)}`;
+  path+=` L340,88 Z`;
+  tl.innerHTML=`<path d="${path}" fill="var(--line)" opacity="0.7"/>`+
+    `<path d="${path.replace(' L340,88 Z','')}" fill="none" stroke="var(--mut)" stroke-width="1" opacity="0.6"/>`;
+}
+function layoutTimeline(){
+  const t=document.getElementById("timeline"), w=t.clientWidth;
+  document.getElementById("thumb").style.left=(playhead*w)+"px";
+  const now=document.querySelector("#thumb .today");
+  now.textContent = Math.abs(playhead-0.40)<0.02 ? "NOW" : monthLabel(playhead);
+  // hot rows
+  const rows=document.querySelectorAll(".trow");
+  rows.forEach(r=>{
+    const pk=parseFloat(r.dataset.peak);
+    r.classList.toggle("hot", Math.abs(playhead-pk)<0.05);
+  });
+}
+function monthLabel(h){
+  const idx=clamp(Math.round(h*(MONTHS.length-1)),0,MONTHS.length-1);
+  return MONTHS[idx].toUpperCase()+" '26";
+}
+function buildRows(){
+  const c=document.getElementById("trows"); c.innerHTML="";
+  for(const t of TRANSITS){
+    if(!IDS.includes(t.node)) continue;
+    const el=document.createElement("div");
+    el.className="trow"; el.dataset.peak=t.peak; el.dataset.node=t.node;
+    el.innerHTML=`<span class="tk"></span><div><div class="m">${t.label}</div><div class="s">${t.sub}</div></div><div class="d">${monthLabel(t.peak)}</div>`;
+    el.addEventListener("click",()=>{ animatePlayhead(t.peak); const i=IDS.indexOf(t.node); if(i>=0){ let dd=((i-journey)%M+M)%M; if(dd>M/2)dd-=M; animateJourney(journey+dd); } });
+    c.appendChild(el);
+  }
+}
+
+// ---- animation helpers ----
+let phAnim=null;
+function animatePlayhead(target){
+  if(phAnim) cancelAnimationFrame(phAnim);
+  const start=playhead, t0=performance.now(), dur=420;
+  (function step(now){
+    const k=clamp((now-t0)/dur,0,1);
+    playhead=lerp(start,target,ease(k));
+    layoutTimeline(); scheduleWheel();
+    if(k<1) phAnim=requestAnimationFrame(step);
+  })(t0);
+}
+let jAnim=null;
+function animateJourney(target){
+  if(jAnim) cancelAnimationFrame(jAnim);
+  const start=journey, t0=performance.now(), dur=440;
+  (function step(now){
+    const k=clamp((now-t0)/dur,0,1);
+    journey=lerp(start,target,ease(k));
+    layoutCards(); scheduleWheel();
+    if(k<1) jAnim=requestAnimationFrame(step);
+  })(t0);
+}
+
+// ---- render scheduling ----
+let wheelQueued=false;
+function scheduleWheel(){
+  if(wheelQueued) return; wheelQueued=true;
+  requestAnimationFrame(()=>{ wheelQueued=false; drawWheel(window.scrollY); });
+}
+window.addEventListener("scroll",scheduleWheel,{passive:true});
+
+// ---- journey scrub (wheel + cards), axis-locked ----
+const STEP_PX=92;
+function attachScrub(el){
+  let sx=0,sy=0,px=0,py=0,axis=null,startJ=0,vel=0,lastX=0,lastT=0,down=false;
+  el.addEventListener("touchstart",e=>{
+    const t=e.touches[0]; sx=px=lastX=t.clientX; sy=py=t.clientY; axis=null; startJ=journey; vel=0; lastT=performance.now();
+    if(jAnim) cancelAnimationFrame(jAnim);
+  },{passive:false});
+  el.addEventListener("touchmove",e=>{
+    const t=e.touches[0];
+    if(axis===null){ const adx=Math.abs(t.clientX-sx),ady=Math.abs(t.clientY-sy);
+      if(adx>7||ady>7) axis=adx>ady?"h":"v"; }
+    const mdx=t.clientX-px, mdy=t.clientY-py; px=t.clientX; py=t.clientY;
+    if(axis==="h"){ e.preventDefault();
+      journey=journey-mdx/STEP_PX;
+      const now=performance.now(); vel=(t.clientX-lastX)/(now-lastT+0.001); lastX=t.clientX; lastT=now;
+      layoutCards(); scheduleWheel();
+    }else if(axis==="v"){ e.preventDefault(); window.scrollBy(0,-mdy); }
+  },{passive:false});
+  el.addEventListener("touchend",()=>{
+    if(axis==="h"){ const target=Math.round(journey - clamp(vel,-2,2)*0.9); animateJourney(target); }
+  });
+  // desktop
+  el.addEventListener("wheel",e=>{ window.scrollBy(0,e.deltaY); },{passive:true});
+  el.addEventListener("mousedown",e=>{ down=true; px=e.clientX; startJ=journey; if(jAnim)cancelAnimationFrame(jAnim); });
+  window.addEventListener("mousemove",e=>{ if(!down)return; const mdx=e.clientX-px; px=e.clientX; journey=journey-mdx/STEP_PX; layoutCards(); scheduleWheel(); });
+  window.addEventListener("mouseup",()=>{ if(down){down=false; animateJourney(Math.round(journey)); } });
+}
+attachScrub(header);
+attachScrub(cardZone);
+
+// ---- timeline scrub ----
+(function(){
+  const tl=document.getElementById("timeline");
+  function set(clientX){ const r=tl.getBoundingClientRect(); playhead=clamp((clientX-r.left)/r.width,0,1); layoutTimeline(); scheduleWheel(); }
+  let drag=false;
+  tl.addEventListener("touchstart",e=>{drag=true; if(phAnim)cancelAnimationFrame(phAnim); set(e.touches[0].clientX); e.preventDefault();},{passive:false});
+  tl.addEventListener("touchmove",e=>{ if(drag){ set(e.touches[0].clientX); e.preventDefault(); }},{passive:false});
+  tl.addEventListener("touchend",()=>drag=false);
+  tl.addEventListener("mousedown",e=>{drag=true; if(phAnim)cancelAnimationFrame(phAnim); set(e.clientX);});
+  window.addEventListener("mousemove",e=>{ if(drag) set(e.clientX); });
+  window.addEventListener("mouseup",()=>drag=false);
+})();
+
+// ---- density switch ----
+document.getElementById("density").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#density button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  SETN=+b.dataset.n; IDS=SETS[SETN].slice(); M=IDS.length;
+  journey=((journey%M)+M)%M;
+  rebuild();
+});
+
+function rebuild(){ buildCards(); buildTimeline(); buildRows(); layoutCards(); layoutTimeline(); scheduleWheel(); }
+
+// ---- boot ----
+function boot(){ sizes(); rebuild(); drawWheel(window.scrollY); }
+window.addEventListener("resize",()=>{ sizes(); layoutCards(); layoutTimeline(); drawWheel(window.scrollY); });
+boot();
+</script>
+</body>
+</html>
