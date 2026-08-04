@@ -120,12 +120,22 @@
       <h1>Static Prototypes</h1>
       <p class="lede">Standalone HTML sketches. Self-contained — no build step, no React.</p>
       <!--
-        Adding a permutation: drop your-journey-interaction-test-00N.html in this
-        folder and copy one <li> below, bumping the number in the href and the
-        .file line. hrefs must stay absolute — a relative ./name breaks when this
-        page is opened without a trailing slash. The .thumb div needs no URL: the
-        script reads it from the enclosing link.
+        The cards below are GENERATED. Everything between prototypes:start and
+        prototypes:end is rewritten by `npm run proto` (build-index.mjs) — edit
+        it by hand and your changes are lost on the next run.
+
+        To add a prototype: drop its .html in this folder, give it a "prototype"
+        metadata block near the top — copy the one at the end of the <head> in
+        your-journey-interaction-test-002.html, which sets title, blurb, group
+        and order — then run `npm run proto`.
+
+        title falls back to the <title> tag, group falls back to Archive, and a
+        missing order sorts last within its group. Field reference lives in the
+        header comment of build-index.mjs.
+        Anything outside the markers — this comment, the styles, the thumbnail
+        script, the footer — is left alone by the generator.
       -->
+      <!-- prototypes:start -->
       <section>
         <h2>Your Journey <span class="count">— Interaction Tests</span></h2>
         <ul>
@@ -133,7 +143,7 @@
             <a class="item" href="/static-prototypes/your-journey-interaction-test-001">
               <div class="thumb"><span class="placeholder">Preview</span></div>
               <div class="label">
-                <div class="name">Test 001 &middot; Conveyor + Strip</div>
+                <div class="name">Conveyor</div>
                 <div class="file">your-journey-interaction-test-001.html</div>
               </div>
             </a>
@@ -142,7 +152,7 @@
             <a class="item" href="/static-prototypes/your-journey-interaction-test-002">
               <div class="thumb"><span class="placeholder">Preview</span></div>
               <div class="label">
-                <div class="name">Test 002 &middot; Spiral + Strip</div>
+                <div class="name">Spiral</div>
                 <div class="file">your-journey-interaction-test-002.html</div>
               </div>
             </a>
@@ -151,16 +161,16 @@
             <a class="item" href="/static-prototypes/your-journey-interaction-test-003">
               <div class="thumb"><span class="placeholder">Preview</span></div>
               <div class="label">
-                <div class="name">Test 003 &middot; Road + Strip</div>
+                <div class="name">Horizon</div>
                 <div class="file">your-journey-interaction-test-003.html</div>
               </div>
             </a>
           </li>
-           <li>
+          <li>
             <a class="item" href="/static-prototypes/your-journey-circle">
               <div class="thumb"><span class="placeholder">Preview</span></div>
               <div class="label">
-                <div class="name">Test 004 &middot; Circle</div>
+                <div class="name">Full Circle</div>
                 <div class="file">your-journey-circle.html</div>
               </div>
             </a>
@@ -168,22 +178,31 @@
         </ul>
       </section>
 
-      
-      <!--section>
-        <h2>Other</h2>
+      <section>
+        <h2>Archive</h2>
         <ul>
           <li>
             <a class="item" href="/static-prototypes/the-pattern-3d-chart">
               <div class="thumb"><span class="placeholder">Preview</span></div>
               <div class="label">
-                <div class="name">3D Natal Chart</div>
+                <div class="name">The Pattern — 3D Natal Chart</div>
                 <div class="file">the-pattern-3d-chart.html</div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="item" href="/static-prototypes/the-pattern-conveyor-strip-RD1">
+              <div class="thumb"><span class="placeholder">Preview</span></div>
+              <div class="label">
+                <div class="name">Conveyor - First Past</div>
+                <div class="file">the-pattern-conveyor-strip-RD1.html</div>
               </div>
             </a>
           </li>
         </ul>
       </section>
-      <footer>&larr; <a href="/">Back to the React prototype</a></footer-->
+      <!-- prototypes:end -->
+      <footer>&larr; <a href="/">Back to the React prototype</a></footer>
     </main>
 
     <script>
