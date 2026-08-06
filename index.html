@@ -32,11 +32,11 @@
         -webkit-font-smoothing: antialiased;
       }
       main { max-width: 68rem; margin: 0 auto; }
-      h1 { font-size: 1.375rem; letter-spacing: -0.01em; margin: 0 0 0.25rem; }
+      h1 { font-size: 1.5rem; letter-spacing: -0.01em; margin: 0 0 0.25rem; }
       p.lede { color: var(--muted); margin: 0 0 2rem; font-size: 0.9375rem; }
       ul {
         list-style: none;
-        margin: 0;
+        margin: 0 0 5rem 0;
         padding: 0;
         display: grid;
         gap: 1.5rem;
@@ -103,14 +103,24 @@
       }
       section { margin-bottom: 2rem; }
       h2 {
-        font-size: 0.75rem;
+        font-size: 1rem;
         text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 590;
+        margin: 0 0 1.5rem 0.125rem;
+        padding-bottom: 0.25rem;
+        width: 100%;
+        border-bottom: 1px solid var(--line);
+      }
+      h2 .count { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+      h3 {
+        font-size: 1rem;
         letter-spacing: 0.06em;
         color: var(--muted);
         font-weight: 590;
-        margin: 0 0 0.75rem 0.125rem;
+        margin: 0 0 1.2rem 0.125rem;
       }
-      h2 .count { text-transform: none; letter-spacing: 0; font-weight: 400; }
       footer { color: var(--muted); font-size: 0.8125rem; margin-top: 2.5rem; }
       footer a { color: inherit; }
     </style>
@@ -138,12 +148,35 @@
       <!-- prototypes:start -->
       <section>
         <h2>Your Journey <span class="count">— Interaction Tests</span></h2>
+        <h3>RD2 Explorations: Refining the Spiral Journey</h3>
         <ul>
+          <li>
+            <a class="item" href="/static-prototypes/your-journey-spiral">
+              <div class="thumb"><span class="placeholder">Preview</span></div>
+              <div class="label">
+                <div class="name">Spiral 001</div>
+                <div class="file">your-journey-spiral.html</div>
+              </div>
+            </a>
+          </li>
+        </ul>
+
+        <h3>RD1 Explorations: Finding the Shape</h3>
+        <ul>
+          <li>
+            <a class="item" href="/static-prototypes/the-pattern-conveyor-strip-RD1">
+              <div class="thumb"><span class="placeholder">Preview</span></div>
+              <div class="label">
+                <div class="name">Conveyor - First Past</div>
+                <div class="file">the-pattern-conveyor-strip-RD1.html</div>
+              </div>
+            </a>
+          </li>
           <li>
             <a class="item" href="/static-prototypes/your-journey-conveyor">
               <div class="thumb"><span class="placeholder">Preview</span></div>
               <div class="label">
-                <div class="name">Conveyor</div>
+                <div class="name">Conveyor — Second Pass</div>
                 <div class="file">your-journey-conveyor.html</div>
               </div>
             </a>
@@ -208,15 +241,7 @@
               </div>
             </a>
           </li>
-          <li>
-            <a class="item" href="/static-prototypes/the-pattern-conveyor-strip-RD1">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Conveyor - First Past</div>
-                <div class="file">the-pattern-conveyor-strip-RD1.html</div>
-              </div>
-            </a>
-          </li>
+
         </ul>
       </section>
       <!-- prototypes:end -->
