@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<!--
+  Prototype: Your Pattern v6 — node interior (Mars in Pisces), pass 4
+  Resolves object-vs-scroll: the Mars figure pins at top and the reading
+  scrolls under it. Scroll position lights the active planet on the figure
+  and brings that thread to full presence; other threads dim but remain.
+  Tap a planet to jump. On the turn outward the figure collapses to an
+  anchor. Muted register, warmth restored via flowing prose + active seams.
+  Self-contained. No dependencies.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Your Pattern — Mars in Pisces</title>
+<style>
+  :root{
+    --paper:#ece7dd;
+    --ink:#2c2723;
+    --ink-2:#6c655b;
+    --faint:#a79e91;
+    --rule:#d0c8ba;
+    --rust:#a5623d;
+    --personal:#6a5f8c;
+    --world:#9a7a37;
+    --community:#7c6a9c;
+    --relational:#a05c58;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Charter,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);color-scheme:light;overflow:hidden;}
+  #app{position:relative;max-width:440px;height:100dvh;margin:0 auto;overflow:hidden;background:var(--paper);}
+
+  .scene{position:absolute;inset:0;transition:opacity .5s ease, transform .5s cubic-bezier(.4,0,.2,1);}
+  #spiralScene{display:flex;flex-direction:column;}
+  #spiralScene.diving{opacity:0;transform:scale(3.2);}
+  #nodeScene{opacity:0;transform:scale(.975);pointer-events:none;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  #nodeScene.active{opacity:1;transform:none;pointer-events:auto;}
+
+  /* ---------- spiral ---------- */
+  .spiral-head{padding:36px 26px 4px;}
+  .kicker{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);}
+  .spiral-head h1{font-family:var(--serif);font-weight:600;font-size:25px;margin:.4em 0 0;}
+  .spiral-wrap{flex:1;display:flex;align-items:center;justify-content:center;}
+  #spiralSvg{width:100%;height:100%;display:block;}
+  .spiral-path{fill:none;stroke:var(--rule);stroke-width:1.3;}
+  .node-label{font-family:var(--sans);font-size:10.5px;fill:var(--ink-2);letter-spacing:.16em;text-transform:uppercase;}
+  .glyph-w{font-size:15px;fill:var(--paper);font-family:var(--serif);}
+  .spiral-foot{padding:4px 26px 32px;text-align:center;}
+  .spiral-foot p{color:var(--ink-2);font-size:14.5px;line-height:1.55;margin:0;}
+  .spiral-foot .cue{color:var(--rust);font-weight:600;}
+
+  /* ---------- node: map (sticky) ---------- */
+  .map{position:sticky;top:0;z-index:8;display:flex;align-items:center;padding:14px 24px 12px;background:var(--paper);}
+  .surface{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);background:none;border:none;padding:6px 8px 6px 0;cursor:pointer;display:flex;align-items:center;gap:6px;}
+  .surface .arrow{font-size:15px;color:var(--rust);}
+  .map-track{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:7px;}
+  .pip{width:7px;height:7px;border-radius:50%;background:var(--rule);}
+  .pip.done{background:var(--faint);}
+  .pip.here{width:10px;height:10px;background:var(--rust);box-shadow:0 0 0 3px rgba(165,98,61,.16);}
+  .pip.next{background:none;border:1.4px solid var(--faint);}
+  .map-lbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-left:9px;}
+
+  /* ---------- node: figure dock (sticky, collapses) ---------- */
+  .dock{position:sticky;top:42px;z-index:6;background:var(--paper);padding:0 24px 6px;
+        box-shadow:0 12px 16px -12px rgba(44,39,35,.12);}
+  .dock .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--rust);}
+  .dock h2{font-family:var(--serif);font-weight:600;font-size:23px;line-height:1.08;margin:.24em 0 2px;transition:font-size .4s;}
+  .fig-box{height:196px;transition:height .45s cubic-bezier(.4,0,.2,1);}
+  .dock.compact h2{font-size:18px;}
+  .dock.compact .fig-box{height:74px;}
+  #figure{width:100%;height:100%;display:block;}
+  .aspect-line{fill:none;stroke:var(--rule);stroke-width:1.5;transition:stroke .4s, stroke-width .4s;}
+  .aspect-line.on{stroke-width:2.4;}
+  .aspect-line.on.personal{stroke:var(--personal);}
+  .planet{cursor:pointer;}
+  .planet-body{transition:fill .4s, stroke .4s;}
+  .planet-glyph{font-family:var(--serif);font-size:16px;text-anchor:middle;pointer-events:none;transition:fill .4s;}
+  .planet-name{font-family:var(--sans);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;fill:var(--ink-2);text-anchor:middle;pointer-events:none;}
+  .center-glyph{font-family:var(--serif);font-size:21px;fill:var(--paper);text-anchor:middle;pointer-events:none;}
+
+  /* ---------- node: reading (scrolls) ---------- */
+  .reading{padding:16px 24px 0;}
+  .thread{margin:0 0 30px;padding-left:16px;border-left:2px solid transparent;
+          opacity:.42;transition:opacity .45s ease, border-color .45s ease;}
+  .thread.lit{opacity:1;}
+  .thread.spine{border-left-color:transparent;padding-left:0;opacity:1;}
+  .thread.lit.saturn,.thread.lit.neptune{border-left-color:var(--personal);}
+  .thread.lit.world{border-left-color:var(--world);}
+  .thread.lit.community{border-left-color:var(--community);}
+  .thread.lit.relational{border-left-color:var(--relational);}
+  .t-label{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;transition:color .45s;}
+  .thread.lit.saturn .t-label,.thread.lit.neptune .t-label{color:var(--personal);}
+  .thread.lit.world .t-label{color:var(--world);}
+  .thread.lit.community .t-label{color:var(--community);}
+  .thread.lit.relational .t-label{color:var(--relational);}
+  .thread p{font-family:var(--serif);font-size:18px;line-height:1.56;color:var(--ink);margin:0 0 .7em;}
+  .thread.spine p{font-size:18.5px;}
+  .thread .cue{color:var(--ink-2);}
+
+  .control{margin-top:8px;display:inline-flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:0;font-family:var(--sans);}
+  .control .pb{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--rust);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .control .c-lbl{font-size:12.5px;color:var(--ink-2);}
+  .control.solid{background:var(--relational);color:#fff;border-radius:999px;padding:11px 18px;}
+  .control.solid .c-lbl{color:#fff;font-weight:600;font-size:13px;}
+
+  .movement{display:flex;align-items:center;gap:14px;margin:2px 0 26px;}
+  .movement .ln{flex:1;height:1px;background:var(--rule);}
+  .movement span{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);}
+
+  .resolve{font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.5;color:var(--ink-2);margin:0 0 30px;}
+
+  .floor{padding-bottom:40vh;}
+  .upnext{border-top:1px solid var(--rule);padding-top:14px;display:flex;align-items:center;gap:13px;cursor:pointer;}
+  .upnext .ring{width:34px;height:34px;border-radius:50%;border:1.4px solid var(--faint);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:var(--serif);font-size:13px;color:var(--ink-2);}
+  .upnext .txt small{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:2px;}
+  .upnext .txt b{font-family:var(--serif);font-weight:600;font-size:15.5px;}
+  .upnext .go{margin-left:auto;color:var(--rust);font-size:18px;}
+  .end-mark{text-align:center;color:var(--faint);font-size:11px;letter-spacing:.3em;margin-top:26px;}
+
+  #toast{position:absolute;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:999px;font-size:13px;z-index:60;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+  #toast.on{opacity:1;transform:translate(-50%,0);}
+
+  @media (prefers-reduced-motion: reduce){
+    .scene,.thread,.aspect-line,.planet-body,.fig-box,.dock h2{transition-duration:.001s;}
+    #spiralScene.diving{transform:none;}
+    .thread{opacity:1;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ SPIRAL ============ -->
+  <section id="spiralScene" class="scene">
+    <div class="spiral-head"><div class="kicker">Your Pattern</div><h1>The journey so far</h1></div>
+    <div class="spiral-wrap">
+      <svg id="spiralSvg" viewBox="0 0 400 420" preserveAspectRatio="xMidYMid meet" aria-label="Your journey spiral">
+        <path id="spiralPath" class="spiral-path"></path><g id="nodes"></g>
+      </svg>
+    </div>
+    <div class="spiral-foot"><p><span class="cue">Mars</span> is where you are now.<br>Tap it to dive in.</p></div>
+  </section>
+
+  <!-- ============ NODE ============ -->
+  <section id="nodeScene" class="scene">
+
+    <div class="map">
+      <button class="surface" id="surfaceBtn"><span class="arrow">↑</span> Surface</button>
+      <div class="map-track">
+        <span class="pip done"></span><span class="pip done"></span>
+        <span class="pip here"></span><span class="pip next"></span>
+        <span class="map-lbl">Mars · 3 of 14</span>
+      </div>
+    </div>
+
+    <div class="dock" id="dock">
+      <div class="eyebrow">How you act</div>
+      <h2>Your Mars in Pisces</h2>
+      <div class="fig-box">
+        <svg id="figure" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid meet" aria-label="Mars and its aspects">
+          <!-- bowed aspect lines read as strain (squares are hard) -->
+          <path id="lineSat" class="aspect-line" d="M160 100 Q 128 68 74 66"></path>
+          <path id="lineNep" class="aspect-line" d="M160 100 Q 196 138 250 150"></path>
+
+          <g class="planet" data-fig="saturn">
+            <circle class="planet-body" cx="74" cy="66" r="21" fill="none" stroke="#a79e91" stroke-width="1.5"></circle>
+            <text class="planet-glyph" x="74" y="72" fill="#6c655b">&#9796;</text>
+            <text class="planet-name" x="74" y="102">Saturn</text>
+          </g>
+          <g class="planet" data-fig="neptune">
+            <circle class="planet-body" cx="250" cy="150" r="21" fill="none" stroke="#a79e91" stroke-width="1.5"></circle>
+            <text class="planet-glyph" x="250" y="156" fill="#6c655b">&#9798;</text>
+            <text class="planet-name" x="250" y="186">Neptune</text>
+          </g>
+          <g class="planet" data-fig="mars">
+            <circle class="planet-body" cx="160" cy="100" r="29" fill="#a5623d"></circle>
+            <text class="center-glyph" x="160" y="109">&#9794;</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="reading">
+
+      <section class="thread spine" data-fig="mars">
+        <p>Your Mars in Pisces doesn't push. It moves like water around whatever's in the way, which reads as gentleness right up until you notice the water got where it was going. You act on feeling and instinct more than plan, and confrontation costs you more than it costs most people.</p>
+        <p>That's the baseline. Your Mars doesn't sit alone, though. <span class="cue">Two slow planets lean on it. Scroll, or tap one.</span></p>
+      </section>
+
+      <section class="thread saturn" data-fig="saturn">
+        <div class="t-label">Saturn square Mars · a complex</div>
+        <p>Saturn makes drive itself feel risky. It asks what your wanting will cost before you've moved a step. The useful version is discipline. The stuck version is a brake you forgot you were holding. In Pisces it rarely arrives as a clean no. It's fog with a weight in it.</p>
+        <button class="control" data-toast="Playing Saturn square Mars. 4 min.">
+          <span class="pb"><svg width="11" height="13" viewBox="0 0 11 13"><path d="M0 0 L11 6.5 L0 13 Z" fill="#a5623d"/></svg></span>
+          <span class="c-lbl">Hear this complex · 4 min</span>
+        </button>
+      </section>
+
+      <section class="thread neptune" data-fig="neptune">
+        <div class="t-label">Neptune square Mars · a complex</div>
+        <p>Neptune dissolves the target. Desire arrives already idealized, so you chase the idea of the thing instead of the thing. The work isn't to want less. It's to check, now and then, whether it's actually there.</p>
+        <button class="control" data-toast="Playing Neptune square Mars. 5 min.">
+          <span class="pb"><svg width="11" height="13" viewBox="0 0 11 13"><path d="M0 0 L11 6.5 L0 13 Z" fill="#a5623d"/></svg></span>
+          <span class="c-lbl">Hear this complex · 5 min</span>
+        </button>
+      </section>
+
+      <p class="resolve">Between them, the pattern: you either don't move, or you move toward a mirage. Catching which, in the moment, is most of the work.</p>
+
+      <div class="movement"><span>Your Mars beyond you</span><div class="ln"></div></div>
+
+      <section class="thread world" data-fig="beyond">
+        <div class="t-label">Cosmic climate · right now</div>
+        <p>For the next week, transiting Mars is crossing your own. It brings the fog forward and makes wanting feel slippery. If your drive's been hard to find lately, that's weather, not a permanent condition.</p>
+        <button class="control" data-toast="Opening this week's climate.">
+          <span class="c-lbl" style="color:var(--world);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;">See this week</span>
+        </button>
+      </section>
+
+      <section class="thread community" data-fig="beyond">
+        <div class="t-label">Pattern recognition</div>
+        <p>About one person in twelve carries Mars in Pisces. A few are almost certainly in your contacts. Recognizing it in someone else is usually the fastest way to understand it in yourself.</p>
+        <button class="control" data-toast="Scanning your Bonds for shared placements.">
+          <span class="c-lbl" style="color:var(--community);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;">Find who shares it</span>
+        </button>
+      </section>
+
+      <section class="thread relational" data-fig="beyond">
+        <div class="t-label">A Bond</div>
+        <p>This kind of pressure shows up between two people as clearly as inside one. If the hesitation feels familiar from someone specific, that isn't a coincidence.</p>
+        <button class="control solid" data-toast="Starting a new Bond."><span class="c-lbl">Form your first Bond</span></button>
+      </section>
+
+      <div class="floor">
+        <div class="upnext" id="upnextBtn">
+          <div class="ring">Asc</div>
+          <div class="txt"><small>Up next</small><b>Your Ascendant</b></div>
+          <div class="go">&#8594;</div>
+        </div>
+        <div class="end-mark">&middot; &middot; &middot;</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+/* ---------- spiral ---------- */
+const cx=200, cy=210, bb=0.215, aa=7.5, tMin=0.35, tMax=5.15*Math.PI;
+function pt(t){const r=aa*Math.exp(bb*t);return [cx+r*Math.cos(t), cy+r*Math.sin(t)];}
+let dp="";for(let t=tMin;t<=tMax;t+=0.06){const [x,y]=pt(t);dp+=(dp?"L":"M")+x.toFixed(2)+" "+y.toFixed(2)+" ";}
+document.getElementById("spiralPath").setAttribute("d",dp);
+const NS="http://www.w3.org/2000/svg";
+const nodesG=document.getElementById("nodes");
+[
+ {name:"Moon",theta:4.55*Math.PI,state:"done"},
+ {name:"Venus",theta:3.50*Math.PI,state:"done"},
+ {name:"Mars",theta:2.55*Math.PI,state:"here",glyph:"\u2642"},
+ {name:"Asc",theta:1.70*Math.PI,state:"next"}
+].forEach(n=>{
+  const [x,y]=pt(n.theta); const depth=(n.theta-tMin)/(tMax-tMin);
+  const rad=n.state==="here"?15:(6.5+depth*5);
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",rad);
+  if(n.state==="done")c.setAttribute("fill","#b3aa9c");
+  else if(n.state==="next"){c.setAttribute("fill","none");c.setAttribute("stroke","#a79e91");c.setAttribute("stroke-width","1.4");}
+  else c.setAttribute("fill","#a5623d");
+  nodesG.appendChild(c);
+  if(n.state==="here"){const g=document.createElementNS(NS,"text");g.setAttribute("class","glyph-w");g.setAttribute("x",x);g.setAttribute("y",y+5);g.setAttribute("text-anchor","middle");g.textContent=n.glyph;nodesG.appendChild(g);}
+  const l=document.createElementNS(NS,"text");l.setAttribute("class","node-label");l.setAttribute("x",x);l.setAttribute("y",y-(rad+(n.state==="here"?20:13)));l.setAttribute("text-anchor","middle");l.setAttribute("opacity",n.state==="done"?.5:(n.state==="next"?.7:1));l.textContent=n.name==="Asc"?"Ascendant":n.name;nodesG.appendChild(l);
+  const h=document.createElementNS(NS,"circle");h.setAttribute("cx",x);h.setAttribute("cy",y);h.setAttribute("r",rad+16);h.setAttribute("fill","transparent");h.style.cursor="pointer";
+  h.addEventListener("click",()=>{ if(n.state==="here")dive(); else if(n.state==="done")toast(n.name+" is behind you."); else toast("Ascendant is next."); });
+  nodesG.appendChild(h);
+});
+
+/* ---------- scenes ---------- */
+const spiralScene=document.getElementById("spiralScene");
+const nodeScene=document.getElementById("nodeScene");
+function dive(){spiralScene.classList.add("diving");setTimeout(()=>{spiralScene.style.display="none";nodeScene.classList.add("active");nodeScene.scrollTop=0;setFigure("mars");litInit();},400);}
+function surface(){nodeScene.classList.remove("active");spiralScene.style.display="flex";void spiralScene.offsetWidth;spiralScene.classList.remove("diving");}
+document.getElementById("surfaceBtn").addEventListener("click",surface);
+document.getElementById("upnextBtn").addEventListener("click",()=>toast("Ascendant is next. Not built in this prototype."));
+
+/* ---------- figure state ---------- */
+const dock=document.getElementById("dock");
+const lineSat=document.getElementById("lineSat");
+const lineNep=document.getElementById("lineNep");
+function setFigure(state){
+  const compact=(state==="beyond");
+  dock.classList.toggle("compact",compact);
+  const sat=(state==="saturn"), nep=(state==="neptune");
+  lineSat.classList.toggle("on",sat); lineSat.classList.toggle("personal",sat);
+  lineNep.classList.toggle("on",nep); lineNep.classList.toggle("personal",nep);
+  document.querySelectorAll(".planet[data-fig]").forEach(g=>{
+    const w=g.dataset.fig; if(w==="mars")return;
+    const on=(w===state);
+    const body=g.querySelector(".planet-body");
+    body.setAttribute("fill", on?"#6a5f8c":"none");
+    body.setAttribute("stroke", on?"#6a5f8c":"#a79e91");
+    g.querySelector(".planet-glyph").setAttribute("fill", on?"#ffffff":"#6c655b");
+  });
+}
+// tap planet -> jump to its thread
+document.querySelectorAll(".planet[data-fig]").forEach(g=>{
+  g.addEventListener("click",()=>{
+    const f=g.dataset.fig;
+    const target=[...document.querySelectorAll(".thread")].find(t=>t.dataset.fig===f) || document.querySelector(".thread.spine");
+    target.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+});
+
+/* ---------- scroll drives which thread is lit + figure ---------- */
+const threads=[...document.querySelectorAll(".thread")];
+function litInit(){ threads.forEach((t,i)=>t.classList.toggle("lit",i===0)); }
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      threads.forEach(t=>t.classList.remove("lit"));
+      e.target.classList.add("lit");
+      setFigure(e.target.dataset.fig);
+    }
+  });
+},{root:nodeScene, rootMargin:"-46% 0px -46% 0px", threshold:0});
+threads.forEach(t=>io.observe(t));
+
+/* ---------- toast ---------- */
+let tT; const toastEl=document.getElementById("toast");
+function toast(m){toastEl.textContent=m;toastEl.classList.add("on");clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove("on"),2200);}
+document.querySelectorAll("[data-toast]").forEach(el=>el.addEventListener("click",(ev)=>{ev.stopPropagation();toast(el.dataset.toast);}));
+</script>
+</body>
+</html>
