@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Your Pattern — Spiral v4</title>
+<style>
+  :root{
+    --bg:#F3EEE4; --card:#FBF8F1; --ink:#2A2320; --mut:#8C8175; --line:#E0D7C8;
+    --lift:#FFFDF7;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{height:100%;}
+  body{margin:0;padding:0;height:100%;overflow:hidden;background:#D6CEBF;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;}
+  #screen{position:relative;width:min(390px,100vw);height:min(844px,100dvh);background:var(--bg);overflow:hidden;transform:translateZ(0);}
+  #scroller{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:none;}
+  @media (min-width:430px) and (min-height:520px){
+    #screen{border-radius:34px;box-shadow:0 22px 60px rgba(42,35,32,.30),0 0 0 1px rgba(42,35,32,.05);}
+  }
+  #header{position:fixed;top:0;left:0;right:0;z-index:20;overflow:hidden;
+    background:var(--bg);touch-action:none;}
+  #svgWrap{width:100%;height:100%;}
+  #hint{position:absolute;left:0;right:0;text-align:center;
+    font-size:11.5px;letter-spacing:.03em;color:var(--mut);pointer-events:none;}
+  #density{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;z-index:40;
+    display:flex;gap:2px;background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:3px;}
+  #density button{border:none;background:none;font:inherit;font-size:12px;color:var(--mut);
+    padding:5px 10px;border-radius:999px;cursor:pointer;}
+  #density button.on{background:var(--ink);color:var(--bg);}
+  main{position:relative;}
+  #sheet{position:relative;will-change:transform;}
+  #cardZone{position:relative;height:224px;touch-action:pan-y;overflow:hidden;}
+  .jcard{position:absolute;top:14px;left:50%;width:300px;height:196px;margin-left:-150px;
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:20px;will-change:transform,opacity;}
+  .jcard .ey{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);}
+  .jcard h2{margin:7px 0 0;font-size:23px;font-weight:600;letter-spacing:-.01em;}
+  .jcard h2 .sg{color:var(--mut);font-weight:500;}
+  .jcard p{margin:9px 0 0;font-size:14px;line-height:1.5;color:#5c534b;}
+  .jcard .cta{position:absolute;left:20px;bottom:18px;display:inline-flex;align-items:center;
+    gap:6px;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .jcard .cta .arw{width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;}
+  section.blk{padding:26px 20px 0;}
+  .lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:0 0 4px;}
+  .sublbl{font-size:13px;color:#5c534b;margin:0 0 16px;}
+  #timeline{position:relative;height:122px;margin:8px 0 6px;user-select:none;touch-action:none;overflow:hidden;cursor:ew-resize;}
+  #tlsvg{position:absolute;inset:0;width:100%;height:100%;}
+  #tcenter{position:absolute;top:8px;bottom:26px;left:50%;width:2px;margin-left:-1px;background:var(--ink);opacity:.9;}
+  #tcenter::after{content:"";position:absolute;bottom:-5px;left:-5px;width:12px;height:12px;border-radius:50%;background:var(--ink);}
+  #tdate{position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:10.5px;letter-spacing:.14em;color:var(--ink);font-weight:600;white-space:nowrap;}
+  .trow{display:flex;align-items:flex-start;padding:14px 2px;border-top:1px solid var(--line);cursor:pointer;}
+  .trow:last-child{border-bottom:1px solid var(--line);}
+  .trow .tk{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink);margin:5px 13px 0 0;flex:0 0 auto;}
+  .trow.hot .tk{background:var(--ink);}
+  .trow .m{font-size:14.5px;font-weight:600;}
+  .trow .s{font-size:12.5px;color:var(--mut);margin-top:2px;}
+  .trow .d{margin-left:auto;font-size:11.5px;color:var(--mut);padding-left:12px;white-space:nowrap;}
+  .foot{padding:22px 20px 150px;font-size:11.5px;line-height:1.6;color:var(--mut);}
+  .chartph{height:340px;border:1px dashed var(--line);border-radius:18px;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    color:var(--mut);font-size:13.5px;letter-spacing:.02em;background:rgba(255,255,255,0.25);}
+  .chartph span{font-size:44px;line-height:1;opacity:.5;}
+  .foot .ref{margin-top:14px;padding:16px;border:1px dashed var(--line);border-radius:14px;
+    text-align:center;color:#5c534b;font-size:13.5px;}
+  @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto;}}
+
+  /* ===== node interior: sequential reader + periphery ===== */
+  #nodeScrim{position:fixed;inset:0;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .4s;z-index:90;}
+  #nodeScrim.on{opacity:1;}
+  #node{position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--ink);
+    overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+    opacity:0;transform:translateY(22px) scale(.92);pointer-events:none;
+    transition:opacity .42s ease, transform .44s cubic-bezier(.34,1,.4,1);}
+  #header,#scroller{transition:transform .44s cubic-bezier(.34,1,.4,1),opacity .4s ease;transform-origin:50% 42%;}
+  #screen.diving #header,#screen.diving #scroller{transform:scale(.93);opacity:.35;}
+  #node.open{opacity:1;transform:none;pointer-events:auto;}
+
+  /* strip: back left, utilities right */
+  .nhead{position:sticky;top:0;z-index:9;background:var(--bg);}
+  .nstrip{display:flex;align-items:center;gap:10px;
+    padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 4px;background:var(--bg);}
+  .jrow{padding:0 12px 8px;}
+  .jrow svg{display:block;width:100%;}
+  .jr-rail{stroke:var(--line);stroke-width:1.5;}
+  .jr-tether{stroke:var(--ink);stroke-width:1.5;}
+  .jr-glyph{fill:var(--bg);font-size:12px;text-anchor:middle;}
+  .jr-name{fill:var(--mut);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;text-anchor:middle;}
+  .jr-sign{fill:var(--ink);font-size:12.5px;font-weight:600;text-anchor:middle;}
+  .backbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);padding:0;}
+  .nutil{margin-left:auto;display:flex;gap:8px;}
+  .util{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);padding:0;}
+  .util.on{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+  .util.hide{display:none;}
+
+  /* reader stage: shortened so periphery peeks; block never scrolls internally */
+  .stage{height:calc(100% - 224px);min-height:360px;display:flex;flex-direction:column;padding:0 24px 10px;transition:opacity .16s ease;}
+  .rcluster{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;}
+  .bglyph{font-size:15px;color:var(--mut);letter-spacing:.22em;}
+  .bey{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-top:10px;}
+  .btitle{font-size:27px;font-weight:600;letter-spacing:-.01em;margin:6px 0 0;line-height:1.1;}
+  .carousel{overflow:hidden;position:relative;margin-top:15px;cursor:grab;touch-action:pan-y;}
+  .carousel:active{cursor:grabbing;}
+  .track{display:flex;align-items:flex-start;transition:transform .34s cubic-bezier(.4,0,.2,1);}
+  .slide{flex:0 0 100%;}
+  .slide p{font-size:20px;line-height:1.5;color:var(--ink);margin:0;}
+  .dots{display:flex;gap:8px;justify-content:center;margin:6px 0 14px;}
+  .dots b{width:8px;height:8px;border-radius:50%;background:var(--line);display:block;transition:background .3s,width .3s;}
+  .dots b.on{background:var(--ink);width:24px;border-radius:4px;}
+  .aud{display:flex;align-items:center;gap:12px;margin:14px 0 2px;padding:9px 13px;border:1px solid var(--line);border-radius:14px;background:var(--card);}
+  .aud.hide{display:none;}
+  .aud-play{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0;}
+  .aud-wave{flex:1;display:flex;align-items:center;gap:2px;height:26px;}
+  .aud-wave i{flex:1;min-width:2px;border-radius:1px;background:var(--line);transition:background .12s;}
+  .aud-wave i.on{background:var(--ink);}
+  .aud-time{font-size:12px;color:var(--mut);flex:0 0 auto;}
+  .bar{display:flex;align-items:center;gap:10px;padding-top:14px;}
+  .navpill{display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 17px;font:inherit;font-size:13px;cursor:pointer;background:none;}
+  .navpill .arw{font-size:14px;}
+  .navpill.prev{border:1px solid var(--line);color:var(--ink);font-weight:600;letter-spacing:.06em;}
+  .navpill.prev.hide{visibility:hidden;}
+  .navpill.next{margin-left:auto;background:var(--ink);color:var(--bg);border:1px solid var(--ink);max-width:66%;opacity:0;transform:translateX(8px);pointer-events:none;transition:opacity .3s,transform .3s;}
+  .navpill.next.show{opacity:1;transform:none;pointer-events:auto;}
+  .navpill.next.down{background:none;color:var(--ink);border:1px solid var(--line);}
+  .navpill.next .lab{min-width:0;text-align:left;}
+  .navpill.next .nx{font-size:9px;letter-spacing:.18em;text-transform:uppercase;opacity:.62;display:block;}
+  .navpill.next .nt{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* periphery: browse, not sequence. spot illustration per block, strong CTA */
+  .peri{background:var(--bg);}
+  .peri-cue{text-align:center;color:var(--mut);font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding:22px 0 8px;border-top:1px solid var(--line);}
+  .peri-cue .dn{display:block;font-size:18px;letter-spacing:0;margin-bottom:2px;line-height:1;}
+  .pblock{text-align:center;padding:44px 26px;border-top:1px solid var(--line);}
+  .pblock.first{border-top:none;padding-top:16px;}
+  .pblock.continue{background:var(--card);}
+  .pill-art{display:flex;justify-content:center;align-items:center;margin-bottom:20px;color:var(--ink);min-height:80px;}
+  .pill-art svg{display:block;}
+  .pt{font-size:21px;font-weight:600;letter-spacing:-.01em;margin:0 0 9px;}
+  .ps{font-size:14px;line-height:1.55;color:var(--mut);margin:0 auto 22px;max-width:30ch;}
+  .pcta{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--ink);background:none;color:var(--ink);border-radius:999px;padding:13px 24px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+  .pcta.solid{background:var(--ink);color:var(--bg);}
+  .pcta .arw{font-size:14px;}
+  .nend{height:44px;}
+
+  #nToast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:13px;z-index:120;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+  #nToast.on{opacity:1;transform:translate(-50%,0);}
+
+</style>
+<!-- prototype
+title: Spiral v4
+blurb: The journey as a coil you travel through. Past winds out large into the foreground and blurs; future recedes tiny toward a glowing horizon eye. Collapses to the strip for transits.
+group: Journey forms
+-->
+</head>
+<body>
+<div id="screen">
+  <div id="density">
+    <button data-n="3">3</button>
+    <button data-n="6">6</button>
+    <button data-n="10" class="on">10</button>
+  </div>
+
+  <div id="header"><div id="svgWrap"></div></div>
+
+  <div id="scroller">
+  <main>
+    <div id="sheet">
+    <div id="cardZone"></div>
+
+    <section class="blk">
+      <div class="lbl">Transits</div>
+      <div class="sublbl">Scrub the waves. Now stays fixed at center; a transit's crest reaching center pulls its node down.</div>
+      <div id="timeline">
+        <svg id="tlsvg" preserveAspectRatio="none"></svg>
+        <div id="tcenter"></div>
+        <div id="tdate">TODAY</div>
+      </div>
+      <div id="trows"></div>
+    </section>
+
+    <section class="blk">
+      <div class="lbl">Full chart</div>
+      <div class="sublbl">The literal chart and aspect list, summoned as reference beneath the reading.</div>
+      <div class="chartph"><span>◎</span>Full chart placeholder</div>
+    </section>
+
+    <section class="foot">
+      Feel test: the journey as a spiral you travel through. Swipe to move along it, the focal is where
+      you are now, the past winds out large into the foreground and blurs as it passes you, the future
+      recedes tiny toward the glowing horizon eye. Scroll to collapse it into the working strip, then
+      scrub the timeline: the contacted node is pulled down and strains as the transit peaks. No color
+      carries meaning. Sample chart (Donna), illustrative.
+    </section>
+    </div>
+  </main>
+  </div>
+
+<script>
+"use strict";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+
+const DEF={
+ moon:{g:"\u263D",n:"Moon",s:"Gemini",r:"Emotions & Inner World",m:"Curious & Expressive",k:"planet"},
+ ic:{g:"IC",n:"Imum Coeli",s:"Libra",r:"Roots & Foundation",m:"Rooted in Harmony",k:"angle"},
+ mercury:{g:"\u263F",n:"Mercury",s:"Cancer",r:"Mind & Communication",m:"Feeling before Thought",k:"planet"},
+ venus:{g:"\u2640",n:"Venus",s:"Gemini",r:"Love & Values",m:"Playful & Open",k:"planet"},
+ dsc:{g:"DC",n:"Descendant",s:"Capricorn",r:"Partnerships & The Other",m:"Drawn to Steadiness",k:"angle"},
+ mars:{g:"\u2642",n:"Mars",s:"Virgo",r:"Drive & Action",m:"Precise & Driven",k:"planet"},
+ jupiter:{g:"\u2643",n:"Jupiter",s:"Virgo",r:"Growth & Expansion",m:"Growth through Craft",k:"planet"},
+ saturn:{g:"\u2644",n:"Saturn",s:"Gemini",r:"Structure & limits",m:"A Disciplined Mind",k:"planet"},
+ mc:{g:"MC",n:"Midheaven",s:"Aries",r:"Purpose & Calling",m:"Bold in the World",k:"angle"},
+ asc:{g:"AC",n:"Ascendant",s:"Cancer",r:"Your Destiny",m:"Becoming Tender",k:"angle"},
+ neptune:{g:"\u2646",n:"Neptune",s:"Sagittarius",r:"Imagination & dissolution",m:"Dreaming Wide",k:"planet"},
+ uranus:{g:"\u2645",n:"Uranus",s:"Libra",r:"Awakening & change",m:"Wired for Change",k:"planet"},
+ pluto:{g:"\u2647",n:"Pluto",s:"Libra",r:"Transformation",m:"A Deep Transformer",k:"planet"},
+ chiron:{g:"\u26B7",n:"Chiron",s:"Aries",r:"The wound & the healer",m:"Healing the Wound",k:"planet"},
+ vesta:{g:"\u26B6",n:"Vesta",s:"Taurus",r:"Devotion & focus",m:"Devoted Focus",k:"planet"},
+ sm:{g:"\u2644",n:"Saturn\u2013Moon",s:"",r:"Complex",m:"A Core Tension",k:"cx"},
+ pm:{g:"\u2647",n:"Pluto\u2013Mercury",s:"",r:"Complex",m:"A Core Tension",k:"cx"},
+ sv:{g:"\u2644",n:"Saturn\u2013Venus",s:"",r:"Complex",m:"A Core Tension",k:"cx"},
+ nv:{g:"\u2646",n:"Neptune\u2013Venus",s:"",r:"Complex",m:"A Core Tension",k:"cx"},
+ um:{g:"\u2645",n:"Uranus\u2013Moon",s:"",r:"Complex",m:"A Core Tension",k:"cx"}
+};
+const SETS={
+ 3:["moon","venus","asc"],
+ 6:["moon","mercury","venus","mars","mc","asc"],
+ 10:["moon","ic","mercury","venus","dsc","mars","jupiter","saturn","mc","asc"]
+};
+const TRANSITS=[
+ {node:"mc",label:"Saturn conjunct Midheaven",sub:"Commitment to your path",peak:0.30},
+ {node:"jupiter",label:"South Node conjunct Jupiter",sub:"Release what no longer grows you",peak:0.36},
+ {node:"moon",label:"Uranus conjunct Moon",sub:"A year of awakening",peak:0.47},
+ {node:"venus",label:"Neptune square Venus",sub:"Idealism around what you value",peak:0.64},
+ {node:"asc",label:"Pluto trine Ascendant",sub:"Realign with who you're becoming",peak:0.79}
+];
+const MONTHS=["Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"];
+
+let SETN=10, IDS=SETS[SETN].slice(), M=IDS.length;
+let journey=0, playhead=0.40;
+let H0=440, STRIP_H=94, COLLAPSE=346;
+
+const header=document.getElementById("header");
+const svgWrap=document.getElementById("svgWrap");
+const cardZone=document.getElementById("cardZone");
+const sheetEl=document.getElementById("sheet");
+const SC=document.getElementById("scroller");
+function updateSheet(){
+  const w=header.clientWidth;
+  const focalRest=H0*0.30+Math.min(H0*0.30,w*0.40);
+  const OMAX=clamp(H0-(focalRest+96),0,H0*0.5);
+  const sCol=clamp(SC.scrollTop/(COLLAPSE*0.5),0,1);   // resolve gently over half the collapse
+  sheetEl.style.transform=`translateY(${(-OMAX*(1-sCol)).toFixed(1)}px)`;
+  sheetEl.style.zIndex = sCol<1 ? "30" : "2";            // flip behind only once the overlap has closed
+}
+
+function sizes(){
+  H0=Math.round(Math.min(SC.clientHeight*0.78, 700));
+  COLLAPSE=H0-STRIP_H;
+  document.querySelector("main").style.paddingTop=H0+"px";
+}
+
+function activation(id,h){
+  let a=0;
+  for(const t of TRANSITS){ if(t.node!==id) continue;
+    const x=(h-t.peak)*7.2; a=Math.max(a, Math.exp(-x*x)); }
+  return a;
+}
+
+// shortest signed offset of node i from focal, wrapped around the loop
+function woff(i){ let d=(i-journey)%M; if(d>M/2)d-=M; if(d<-M/2)d+=M; return d; }
+
+// ---- wheel / strip render ----
+function drawWheel(scrollY){
+  const W=header.clientWidth;
+  const headerH=H0-Math.min(scrollY,COLLAPSE);
+  header.style.height=headerH+"px";
+  const p=clamp(scrollY/COLLAPSE,0,1);
+
+  const cx=W/2;
+  const stripY=STRIP_H*0.46, STRIP_SP=52, PULL=20;
+  const VH=SC.clientHeight||H0;
+
+  // the spiral is the hero; it holds, then collapses to the working strip on scroll
+  const HOLD=clamp(H0-VH*0.60, 40, COLLAPSE-120);
+  const mp=clamp((scrollY-HOLD)/Math.max(COLLAPSE-HOLD,1),0,1);
+  const mpE=ease(mp);
+  const spiralShow=1-mpE;                        // 1 = spiral, 0 = strip
+  const labelsOp=clamp(1-mp*3.4,0,1);
+  const transitFocus=clamp((scrollY-(COLLAPSE-30))/140,0,1);
+
+  // log spiral: focal mid-path, PAST winds outward (large, near, off the bottom),
+  // FUTURE winds inward (tiny) toward a glowing horizon eye you travel toward
+  const GROW_F=1.42, GROW_P=1.95, TURN=1.6, BEHIND=1.5;
+  const R0S=Math.min(headerH*0.30, W*0.40);
+  const Yeye=headerH*0.30;
+
+  // a whisper of forward travel at rest, so the path feels alive
+  const idle=clamp(1-scrollY/40,0,1)*spiralShow;
+  const drift=0.035*Math.sin(nowT/2300)*idle;
+
+  const items=[];
+  for(let i=0;i<M;i++){
+    const dw=woff(i);                                    // symmetric, for the strip
+    let fd=((i-journey)%M+M)%M;
+    const d=fd>M-BEHIND?fd-M:fd;                          // forward-biased: most nodes ride the coil
+    // circular log spiral. Future shrinks gently, so more nodes fit along the coil and it
+    // winds an extra turn into the eye; past grows fast, looming large as it passes you by
+    const g=d>=0?GROW_F:GROW_P;
+    const rho=R0S*Math.pow(g,-d)*(1+0.02*Math.sin(nowT/1900+i*0.7)*idle);
+    const ang=d*TURN+drift;
+    const spiralX=cx+rho*Math.sin(ang);
+    const spiralY=Yeye+rho*Math.cos(ang);
+    const psc=clamp(rho/R0S,0.015,7);                     // >1 past (big/near), <1 future (tiny/far)
+    const spiralBlur=d<0?clamp((psc-1)*2.6,0,10):clamp((0.4-psc)*3.2,0,1.6);
+    const wrapFade=clamp((M-BEHIND-d)/1.4,0,1)*clamp((d+BEHIND)/0.8,0,1);
+    const baseOp=wrapFade*clamp((7.6-psc)/1.4,0,1);
+
+    const lineX=cx+dw*STRIP_SP, lineY=stripY;
+    const X0=lerp(spiralX,lineX,mpE);
+    let Y=lerp(spiralY,lineY,mpE);
+
+    const f=clamp(1-Math.abs(d)/0.7,0,1);
+    const spiralR=Math.max(24*psc,2.8), stripR=lerp(16,23,f);
+    let r=lerp(spiralR,stripR,mpE);
+
+    const act=activation(IDS[i],playhead);
+    Y+=act*PULL*transitFocus;
+    let X=X0;
+    if(act>0.12 && transitFocus>0.01){                 // fine tremor under a peaking transit
+      const j=act*0.8*transitFocus;
+      X+=j*Math.sin(nowT/55+i*7.3);
+      Y+=j*Math.cos(nowT/47+i*5.1);
+    }
+    r*=(1+act*0.12*transitFocus);
+
+    const edge=Math.abs(lineX-cx)-(W/2-26);
+    const stripOp=clamp(1-Math.max(0,edge)/34,0,1);
+    const op=lerp(baseOp,stripOp,mpE);
+    if(op<0.02) continue;
+
+    const blur=spiralBlur*spiralShow;
+    items.push({i,d,X,Y,r,f,op,act,blur,psc});
+  }
+  items.sort((u,v)=>u.psc-v.psc);   // far/small first, near/large foreground on top
+
+  // defs: glow, the horizon eye, and one blur filter per out-of-focus node
+  let defs=`<filter id="gl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>`+
+    `<radialGradient id="eye" cx="50%" cy="${(Yeye/headerH*100).toFixed(1)}%" r="52%">`+
+    `<stop offset="0%" stop-color="#FFFDF8" stop-opacity="0.98"/>`+
+    `<stop offset="30%" stop-color="#FFFBF0" stop-opacity="0.55"/>`+
+    `<stop offset="70%" stop-color="#FBF4E6" stop-opacity="0.14"/>`+
+    `<stop offset="100%" stop-color="#FBF4E6" stop-opacity="0"/></radialGradient>`;
+  for(const it of items){ if(it.blur>0.15) defs+=`<filter id="bl${it.i}" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="${it.blur.toFixed(2)}"/></filter>`; }
+
+  let s=`<svg width="100%" height="${headerH}" viewBox="0 0 ${W} ${headerH}" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>`;
+
+  // the horizon eye you travel toward (value, not hue), fades on collapse
+  if(spiralShow>0.02) s+=`<rect x="0" y="0" width="${W}" height="${headerH}" fill="url(#eye)" opacity="${spiralShow.toFixed(3)}"/>`;
+
+  // the coil path, tapered thick in the foreground to a hairline at the horizon eye
+  const lineOp=spiralShow*0.55;
+  if(lineOp>0.02){
+    let seg="", prev=null;
+    for(let ss=-1.6; ss<=9.4; ss+=0.06){
+      const g=ss>=0?GROW_F:GROW_P;
+      const rr=R0S*Math.pow(g,-ss);
+      if(rr>R0S*7||rr<R0S*0.012){ prev=null; continue; }
+      const aa=ss*TURN+drift;
+      const x=cx+rr*Math.sin(aa), y=Yeye+rr*Math.cos(aa);
+      if(prev){
+        const w=clamp((rr/R0S)*6.6,0.8,24);           // near = thick, far = hairline
+        seg+=`<line x1="${prev.x.toFixed(1)}" y1="${prev.y.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke-width="${w.toFixed(2)}"/>`;
+      }
+      prev={x,y};
+    }
+    s+=`<g stroke="var(--line)" stroke-linecap="round" opacity="${lineOp.toFixed(3)}">${seg}</g>`;
+  }
+
+  // strip rail (fades in)
+  const railOp=clamp((mp-0.55)/0.45,0,1)*0.9;
+  if(railOp>0.01) s+=`<line x1="20" y1="${stripY}" x2="${W-20}" y2="${stripY}" stroke="var(--line)" stroke-width="1.5" opacity="${railOp}"/>`;
+
+  for(const it of items){
+    const id=IDS[it.i], def=DEF[id];
+    const r=it.r, f=it.f;
+    const fo=it.blur>0.15?` filter="url(#bl${it.i})"`:"";
+    if(it.act>0.03 && transitFocus>0.05) s+=`<circle cx="${it.X}" cy="${it.Y}" r="${r*1.85}" fill="var(--lift)" opacity="${(it.act*0.7*transitFocus).toFixed(3)}" filter="url(#gl)"/>`;
+    s+=`<g${fo} data-nodeid="${id}" style="cursor:pointer"><circle cx="${it.X}" cy="${it.Y}" r="${r}" fill="var(--card)" stroke="var(--ink)" stroke-width="1.4" opacity="${it.op}"/>`;
+    if(f>0.02) s+=`<circle cx="${it.X}" cy="${it.Y}" r="${r}" fill="var(--ink)" opacity="${(f*it.op).toFixed(3)}"/>`;
+    const gsz=(def.k==="angle")?r*0.74:r*1.02;
+    if((1-f)>0.02) s+=glyph(def.g,it.X,it.Y,gsz,"var(--ink)",((1-f)*it.op).toFixed(3));
+    if(f>0.02)     s+=glyph(def.g,it.X,it.Y,gsz,"var(--bg)",(f*it.op).toFixed(3));
+    s+=`</g>`;
+
+    if(labelsOp>0.05 && it.blur<1 && f>0.5){
+      const lop=labelsOp*it.op;
+      s+=`<text x="${it.X}" y="${(it.Y+r+16).toFixed(1)}" text-anchor="middle" font-size="11" letter-spacing="1" fill="var(--mut)" opacity="${lop.toFixed(3)}" font-family="-apple-system,sans-serif">${def.n.toUpperCase()}</text>`;
+      if(def.s) s+=`<text x="${it.X}" y="${(it.Y+r+31).toFixed(1)}" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)" opacity="${lop.toFixed(3)}" font-family="-apple-system,sans-serif">${def.s}</text>`;
+    }
+  }
+
+  s+=`</svg>`;
+  svgWrap.innerHTML=s;
+}
+function glyph(g,x,y,size,fill,op){
+  const fs=g.length>1?size*0.82:size*1.02;
+  return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="600" fill="${fill}" opacity="${op}" font-family="-apple-system,sans-serif">${g}</text>`;
+}
+
+// ---- cards ----
+function buildCards(){
+  cardZone.innerHTML="";
+  for(let i=0;i<M;i++){
+    const def=DEF[IDS[i]];
+    const el=document.createElement("div");
+    el.className="jcard";
+    el.innerHTML=`<div class="ey">${def.r}</div>`+
+      `<h2>${def.m}</h2>`+
+      `<p>${cardCopy(def)}</p>`+
+      `<span class="cta">Explore <span class="arw">&rsaquo;</span></span>`;
+    cardZone.appendChild(el);
+  }
+}
+function cardCopy(def){
+  if(def.k==="cx") return "A defining tension in your chart. Read how these two forces meet.";
+  if(def.k==="angle") return "An orientation point of your chart. Where your Pattern turns.";
+  return "Your personal insight, education, and Go Deeper audio, gathered in one place.";
+}
+function layoutCards(){
+  const kids=cardZone.children, W=cardZone.clientWidth;
+  const step=Math.min(W-24, 316);
+  for(let i=0;i<kids.length;i++){
+    const off=woff(i);
+    const tx=off*step;
+    const ax=Math.min(Math.abs(off),1);
+    const sc=1-ax*0.07;
+    const op=Math.abs(off)>1.6?0:1-ax*0.55;
+    const k=kids[i];
+    k.style.transform=`translateX(${tx}px) scale(${sc})`;
+    k.style.opacity=op;
+    k.style.zIndex=Math.round(100-Math.abs(off)*10);
+    k.style.pointerEvents=Math.abs(off)<0.5?"auto":"none";
+  }
+}
+
+// ---- timeline ----
+const TL_WINDOW=0.62; // fraction of the time range visible across the timeline width
+function buildTimeline(){ /* waves are drawn live in layoutTimeline */ }
+function layoutTimeline(){
+  const tl=document.getElementById("timeline");
+  const w=tl.clientWidth, h=tl.clientHeight;
+  const cxp=w/2, base=h-26, top=14, WH=base-top, ppu=w/TL_WINDOW, SEL=7.2;
+  const svg=document.getElementById("tlsvg");
+  svg.setAttribute("viewBox",`0 0 ${w} ${h}`);
+  let g=`<defs><linearGradient id="wv" x1="0" y1="0" x2="0" y2="1">`+
+    `<stop offset="0%" stop-color="var(--ink)" stop-opacity="0.85"/>`+
+    `<stop offset="100%" stop-color="var(--ink)" stop-opacity="0"/></linearGradient></defs>`;
+  g+=`<line x1="0" y1="${base}" x2="${w}" y2="${base}" stroke="var(--line)" stroke-width="1"/>`;
+  for(let m=0;m<MONTHS.length;m++){
+    const x=cxp+(m/(MONTHS.length-1)-playhead)*ppu;
+    if(x<-24||x>w+24) continue;
+    g+=`<line x1="${x.toFixed(1)}" y1="${base}" x2="${x.toFixed(1)}" y2="${base+4}" stroke="var(--line)" stroke-width="1"/>`;
+    g+=`<text x="${x.toFixed(1)}" y="${base+16}" text-anchor="middle" font-size="10" fill="var(--mut)" font-family="-apple-system,sans-serif">${MONTHS[m]}</text>`;
+  }
+  const xt=cxp+(0.40-playhead)*ppu;
+  if(xt>-16&&xt<w+16){
+    g+=`<line x1="${xt.toFixed(1)}" y1="${top-2}" x2="${xt.toFixed(1)}" y2="${base}" stroke="var(--mut)" stroke-width="1" stroke-dasharray="2 3" opacity="0.6"/>`;
+    g+=`<text x="${xt.toFixed(1)}" y="${top-5}" text-anchor="middle" font-size="8.5" fill="var(--mut)" letter-spacing="1" font-family="-apple-system,sans-serif">TODAY</text>`;
+  }
+  const waves=TRANSITS.filter(t=>IDS.includes(t.node)).map(t=>{
+    let d="";
+    for(let x=0;x<=w;x+=4){
+      const tt=playhead+(x-cxp)/ppu;
+      const y=base-WH*Math.exp(-Math.pow((tt-t.peak)*SEL,2));
+      d+=(d?" L":"M")+x+","+y.toFixed(1);
+    }
+    const act=Math.exp(-Math.pow((playhead-t.peak)*SEL,2));
+    return {d,act};
+  });
+  for(const wv of waves) g+=`<path d="${wv.d} L${w},${base} L0,${base} Z" fill="url(#wv)" opacity="${(0.09+wv.act*0.16).toFixed(3)}"/>`;
+  for(const wv of waves) g+=`<path d="${wv.d}" fill="none" stroke="var(--ink)" stroke-width="1.3" opacity="${(0.26+wv.act*0.5).toFixed(3)}"/>`;
+  svg.innerHTML=g;
+  document.getElementById("tdate").textContent = Math.abs(playhead-0.40)<0.015?"TODAY":monthLabel(playhead);
+  document.querySelectorAll(".trow").forEach(r=>{
+    const pk=parseFloat(r.dataset.peak);
+    r.classList.toggle("hot", Math.abs(playhead-pk)<0.05);
+  });
+}
+function monthLabel(h){
+  const idx=clamp(Math.round(h*(MONTHS.length-1)),0,MONTHS.length-1);
+  return MONTHS[idx].toUpperCase()+" '26";
+}
+function buildRows(){
+  const c=document.getElementById("trows"); c.innerHTML="";
+  for(const t of TRANSITS){
+    if(!IDS.includes(t.node)) continue;
+    const el=document.createElement("div");
+    el.className="trow"; el.dataset.peak=t.peak; el.dataset.node=t.node;
+    el.innerHTML=`<span class="tk"></span><div><div class="m">${t.label}</div><div class="s">${t.sub}</div></div><div class="d">${monthLabel(t.peak)}</div>`;
+    el.addEventListener("click",()=>{ animatePlayhead(t.peak); const i=IDS.indexOf(t.node); if(i>=0){ let dd=((i-journey)%M+M)%M; if(dd>M/2)dd-=M; animateJourney(journey+dd); } });
+    c.appendChild(el);
+  }
+}
+
+// ---- animation helpers ----
+let phAnim=null;
+function animatePlayhead(target){
+  if(phAnim) cancelAnimationFrame(phAnim);
+  const start=playhead, t0=performance.now(), dur=420;
+  (function step(now){
+    const k=clamp((now-t0)/dur,0,1);
+    playhead=lerp(start,target,ease(k));
+    layoutTimeline(); scheduleWheel();
+    if(k<1) phAnim=requestAnimationFrame(step);
+  })(t0);
+}
+let jAnim=null;
+function animateJourney(target){
+  if(jAnim) cancelAnimationFrame(jAnim);
+  const start=journey, t0=performance.now(), dur=440;
+  (function step(now){
+    const k=clamp((now-t0)/dur,0,1);
+    journey=lerp(start,target,ease(k));
+    layoutCards(); scheduleWheel();
+    if(k<1) jAnim=requestAnimationFrame(step);
+  })(t0);
+}
+
+// ---- render scheduling ----
+let nowT=0, wheelQueued=false;
+function scheduleWheel(){
+  if(wheelQueued) return; wheelQueued=true;
+  requestAnimationFrame(()=>{ wheelQueued=false; drawWheel(SC.scrollTop); });
+}
+SC.addEventListener("scroll",()=>{ updateSheet(); scheduleWheel(); },{passive:true});
+
+// continuous loop for breathing (at rest) and transit vibration
+function anyTension(){
+  for(const t of TRANSITS){ if(!IDS.includes(t.node)) continue;
+    const x=(playhead-t.peak)*7.2; if(Math.exp(-x*x)>0.12) return true; }
+  return false;
+}
+function loop(ts){
+  nowT=ts;
+  const p=clamp(SC.scrollTop/COLLAPSE,0,1);
+  updateSheet();
+  if(p<0.995 || anyTension()) drawWheel(SC.scrollTop);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ---- journey scrub (wheel + cards), axis-locked ----
+const STEP_PX=92;
+function attachScrub(el){
+  let sx=0,sy=0,px=0,py=0,axis=null,startJ=0,vel=0,lastX=0,lastT=0,down=false;
+  el.addEventListener("touchstart",e=>{
+    const t=e.touches[0]; sx=px=lastX=t.clientX; sy=py=t.clientY; axis=null; startJ=journey; vel=0; lastT=performance.now();
+    if(jAnim) cancelAnimationFrame(jAnim);
+  },{passive:false});
+  el.addEventListener("touchmove",e=>{
+    const t=e.touches[0];
+    if(axis===null){ const adx=Math.abs(t.clientX-sx),ady=Math.abs(t.clientY-sy);
+      if(adx>7||ady>7) axis=adx>ady?"h":"v"; }
+    const mdx=t.clientX-px, mdy=t.clientY-py; px=t.clientX; py=t.clientY;
+    if(axis==="h"){ e.preventDefault();
+      journey=journey-mdx/STEP_PX;
+      const now=performance.now(); vel=(t.clientX-lastX)/(now-lastT+0.001); lastX=t.clientX; lastT=now;
+      layoutCards(); scheduleWheel();
+    }else if(axis==="v"){ e.preventDefault(); SC.scrollTop-=mdy; }
+  },{passive:false});
+  el.addEventListener("touchend",()=>{
+    if(axis==="h"){ const target=Math.round(journey - clamp(vel,-2,2)*0.9); animateJourney(target); }
+  });
+  // desktop
+  el.addEventListener("wheel",e=>{ SC.scrollTop+=e.deltaY; },{passive:true});
+  el.addEventListener("mousedown",e=>{ down=true; px=e.clientX; startJ=journey; if(jAnim)cancelAnimationFrame(jAnim); });
+  window.addEventListener("mousemove",e=>{ if(!down)return; const mdx=e.clientX-px; px=e.clientX; journey=journey-mdx/STEP_PX; layoutCards(); scheduleWheel(); });
+  window.addEventListener("mouseup",()=>{ if(down){down=false; animateJourney(Math.round(journey)); } });
+}
+attachScrub(header);
+attachScrub(cardZone);
+
+// ---- timeline scrub ----
+(function(){
+  const tl=document.getElementById("timeline");
+  const ppu=()=>tl.clientWidth/TL_WINDOW;
+  let drag=false, px=0;
+  function start(x){ drag=true; px=x; if(phAnim)cancelAnimationFrame(phAnim); }
+  function move(x){ if(!drag)return; const dx=x-px; px=x; playhead=clamp(playhead-dx/ppu(),0,1); layoutTimeline(); scheduleWheel(); }
+  tl.addEventListener("touchstart",e=>{start(e.touches[0].clientX); e.preventDefault();},{passive:false});
+  tl.addEventListener("touchmove",e=>{move(e.touches[0].clientX); e.preventDefault();},{passive:false});
+  tl.addEventListener("touchend",()=>drag=false);
+  tl.addEventListener("mousedown",e=>start(e.clientX));
+  window.addEventListener("mousemove",e=>move(e.clientX));
+  window.addEventListener("mouseup",()=>drag=false);
+})();
+
+// ---- density switch ----
+document.getElementById("density").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#density button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  SETN=+b.dataset.n; IDS=SETS[SETN].slice(); M=IDS.length;
+  journey=((journey%M)+M)%M;
+  rebuild();
+});
+
+function rebuild(){ buildCards(); buildTimeline(); buildRows(); layoutCards(); layoutTimeline(); scheduleWheel(); }
+
+// ---- boot ----
+function boot(){ sizes(); rebuild(); updateSheet(); drawWheel(SC.scrollTop); }
+window.addEventListener("resize",()=>{ sizes(); layoutCards(); layoutTimeline(); updateSheet(); drawWheel(SC.scrollTop); });
+boot();
+</script>
+
+<!-- ===== node interior (added) ===== -->
+<div id="nodeScrim"></div>
+<div id="node"></div>
+<div id="nToast"></div>
+<script>
+"use strict";
+(function(){
+  const nodeEl=document.getElementById("node");
+  const scrim=document.getElementById("nodeScrim");
+  const SC=document.getElementById("scroller");
+  const screenEl=document.getElementById("screen");
+  const svgWrap=document.getElementById("svgWrap");
+
+  const SG={Aries:"\u2648",Taurus:"\u2649",Gemini:"\u264A",Cancer:"\u264B",Leo:"\u264C",Virgo:"\u264D",Libra:"\u264E",Scorpio:"\u264F",Sagittarius:"\u2650",Capricorn:"\u2651",Aquarius:"\u2652",Pisces:"\u2653"};
+
+  const MOON_BLOCKS=[
+    {ey:"Where your Moon sits", title:"Curious, and a little guarded", glyph:"\u263D \u264A",
+     slides:[
+      "Your Moon in Gemini feels by narrating. The words and the feeling arrive together, so you can seem light even when something has landed hard.",
+      "Two forces shape that. One asks your feelings to justify themselves before they count. The other keeps them moving faster than you can settle. What follows is how they play out."
+     ]},
+    {ey:"Moon in Gemini", title:"Curious & Expressive", glyph:"\u263D \u264A", audioLen:"3 min",
+     slides:[
+      "You process the world by talking about it. Naming a feeling is how you have it, and a thought left unspoken barely feels real yet.",
+      "You need variety the way other people need rest. A single mood, held too long, starts to feel like a room with no windows.",
+      "At your best you are quick, warm, and genuinely curious about people. The risk is talking yourself past a feeling before you have finished having it."
+     ]},
+    {ey:"Saturn square Moon", title:"The Guarded Heart", glyph:"\u2644 \u263D", audioLen:"4 min",
+     slides:[
+      "Before a feeling is allowed, some part of you checks whether it is justified, proportionate, grown up. Emotions arrive and have to pass inspection.",
+      "From outside it looks like composure. Inside it can be a coldness toward your own reactions that you would never aim at a friend.",
+      "The steadiness underneath is real and worth keeping. The work is letting a feeling exist before you decide whether it earned the right."
+     ]},
+    {ey:"Uranus conjunct Moon", title:"The Restless Mood", glyph:"\u2645 \u263D", audioLen:"5 min",
+     slides:[
+      "Your moods change fast and do not ask permission. You can go from fine to done inside a sentence, and routine wears on you sooner than on most.",
+      "From outside it reads as unpredictable. From inside it is closer to needing air. The practice is telling the people close to you before the window opens, not after."
+     ]},
+    {ey:"This year \u00b7 Uranus conjunct Moon", title:"A Year of Awakening", glyph:"\u2645 \u263D", audioLen:"6 min",
+     slides:[
+      "Right now the sky's Uranus is sitting on your Moon. The restlessness you carry anyway is turned up to a roar this year.",
+      "It is a season for changing what you feel you are allowed to feel, not a permanent setting. It passes. What you let it shake loose is up to you."
+     ]}
+  ];
+  const GEN={
+    venus:[{ey:"Saturn square Venus",t:"The Careful Heart",g:"\u2644 \u2640",slides:["Love and worth, measured against a standard.","Saturn on Venus makes affection feel like something to earn. The warmth is real, but a part of you keeps score. The work is letting closeness exist without an invoice."]},
+           {ey:"Neptune square Venus",t:"The Gilded Eye",g:"\u2646 \u2640",slides:["You fall for the ideal, not the person.","Neptune on Venus gilds whatever you want. The feeling is genuine and the picture is retouched. Checking the picture against the person is the practice."]}],
+    mercury:[{ey:"Pluto square Mercury",t:"The Deep Diver",g:"\u2647 \u263F",slides:["Thinking that goes all the way down, or not at all.","Pluto on Mercury makes your mind intense and a little compulsive. You either bury a subject or ignore it. Moderation is the muscle to build."]}]
+  };
+  function buildBlocks(id){
+    if(id==="moon") return MOON_BLOCKS.map(b=>Object.assign({},b));
+    const def=DEF[id], sg=SG[def.s]||"", t=TRANSITS.find(x=>x.node===id), blocks=[];
+    blocks.push({ey:"Where your "+def.n+" sits", title:"Your "+def.n+" in "+def.s, glyph:def.g+" "+sg,
+      slides:["Your "+def.n+" in "+def.s+" shapes "+def.r.toLowerCase()+". "+def.m+", in the way you meet the world.","The authored opening summary would frame the blocks that follow. This node is illustrative in the prototype."]});
+    blocks.push({ey:def.n+" in "+def.s, title:def.m, glyph:def.g+" "+sg, audioLen:"3 min",
+      slides:[def.m+". This is the shape your "+def.n+" tends to take.","Short authored insights would continue here, one card at a time."]});
+    (GEN[id]||[]).forEach(c=>blocks.push({ey:c.ey,title:c.t,glyph:c.g,audioLen:"4 min",slides:c.slides.slice()}));
+    if(t) blocks.push({ey:"This year \u00b7 "+t.label, title:t.sub, glyph:def.g+" "+sg, audioLen:"5 min", slides:[t.sub+". This is the weather your "+def.n+" is under this year, not a permanent setting. It passes."]});
+    return blocks;
+  }
+
+  const A={
+    orbit:()=>'<svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="40" cy="40" r="8"/><ellipse cx="40" cy="40" rx="32" ry="13" transform="rotate(-24 40 40)"/><circle cx="67" cy="27" r="3.4" fill="currentColor"/></svg>',
+    bond:()=>'<svg width="94" height="80" viewBox="0 0 94 80" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="36" cy="40" r="21"/><circle cx="58" cy="40" r="21"/><circle cx="36" cy="40" r="3" fill="currentColor" stroke="none"/><circle cx="58" cy="40" r="3" fill="currentColor" stroke="none"/></svg>',
+    people:()=>'<svg width="98" height="72" viewBox="0 0 98 72" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="25" y1="26" x2="49" y2="48"/><line x1="49" y1="48" x2="73" y2="22"/><line x1="25" y1="26" x2="73" y2="22"/><circle cx="25" cy="26" r="6.5" fill="currentColor" stroke="none"/><circle cx="49" cy="48" r="6.5" fill="currentColor" stroke="none"/><circle cx="73" cy="22" r="6.5" fill="currentColor" stroke="none"/></svg>',
+    glyph:ch=>'<svg width="80" height="80" viewBox="0 0 80 80"><text x="40" y="40" text-anchor="middle" dominant-baseline="central" font-size="46" fill="currentColor">'+ch+'</text></svg>',
+    ring:ch=>'<svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="40" cy="40" r="30"/><text x="40" y="40" text-anchor="middle" dominant-baseline="central" font-size="26" fill="currentColor" stroke="none">'+ch+'</text></svg>'
+  };
+
+  function periphery(id){
+    const def=DEF[id], idx=Math.max(0,IDS.indexOf(id)), t=TRANSITS.find(x=>x.node===id);
+    const nextId=IDS[(idx+1)%M], next=DEF[nextId], isMoon=id==="moon", sg=SG[def.s]||"";
+    let first=true;
+    const blk=(art,tt,ss,cta,act,solid)=>{
+      const c='<div class="pblock'+(first?' first':'')+(act==="continue"?' continue':'')+'">'+
+        '<div class="pill-art">'+art+'</div><div class="pt">'+tt+'</div><div class="ps">'+ss+'</div>'+
+        '<button class="pcta'+(solid?' solid':'')+'" data-act="'+act+'">'+cta+((solid)?' <span class="arw">&rarr;</span>':'')+'</button></div>';
+      first=false; return c;
+    };
+    let h='<div class="peri"><div class="peri-cue"><span class="dn">&#8964;</span> More of your '+def.n+'</div>';
+    if(t) h+=blk(A.orbit(), t.sub, "Uranus is crossing your "+def.n+" this year. See where it crests on your timeline.", "See it on your timeline", "transit", false);
+    h+=blk(A.bond(), "Bring someone into it", (isMoon?"A Saturn and Moon contact is one of the most familiar tensions between two people. See whose chart it lands on.":"See how this lands between two charts."), "Form your first Bond", "bond", true);
+    h+=blk(A.glyph(def.g), "What the "+def.n+" governs", "The basics of the "+def.n+", in plain language.", "Start Astro 101", "learn", false);
+    h+=blk(A.glyph(sg), "The "+def.s+" archetype", "Where the sign comes from, and why it fits you.", "Explore "+def.s, "archetype", false);
+    h+=blk(A.people(), "You're in good company", (isMoon?"Bob Dylan is a Gemini Moon too. About one in twelve are.":"About one in twelve share this placement."), "Find your matches", "shares", false);
+    h+=blk(A.ring(next.g), "Keep moving through your journey", "Next is your "+next.n+", "+(next.r||"").toLowerCase()+".", "Continue to your "+next.n, "continue", true);
+    h+='<div class="nend"></div></div>';
+    return h;
+  }
+
+  const SVG={
+    back:'<svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 1L2 8 8 15"/></svg>',
+    book:'<svg width="14" height="16" viewBox="0 0 14 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 1.5h10v13l-5-3.6-5 3.6z"/></svg>',
+    share:'<svg width="15" height="16" viewBox="0 0 15 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7.5 1v9.5M7.5 1L5 3.6M7.5 1l2.5 2.6M2.5 7.5V14h10V7.5"/></svg>',
+    play:'<svg width="11" height="13" viewBox="0 0 11 13"><path d="M0 0 L11 6.5 L0 13 Z" fill="currentColor"/></svg>'
+  };
+
+  let blocks=[], bi=0, si=0, nodeId=null, suppressClick=false;
+  let stage,track,dots,carousel,navPrev,navNext,bookBtn,shareBtn;
+  let audEl,audPlay,audWave,audTime,audProg=0,audRAF=null,audPlaying=false,audT0=0;
+  const DEMO=16;
+  const IC_PLAY='<svg width="11" height="13" viewBox="0 0 11 13"><path d="M0 0 L11 6.5 L0 13 Z" fill="currentColor"/></svg>';
+  const IC_PAUSE='<svg width="10" height="12" viewBox="0 0 10 12"><rect x="0" y="0" width="3.2" height="12" fill="currentColor"/><rect x="6.8" y="0" width="3.2" height="12" fill="currentColor"/></svg>';
+  function buildWave(){ if(!audWave) return; let w=''; const N=34; for(let k=0;k<N;k++){ const h=Math.min(24,6+Math.round((Math.sin(k*0.9)*0.5+0.5)*16)+((k*7)%5)); w+='<i style="height:'+h+'px"></i>'; } audWave.innerHTML=w; }
+  function audRender(){ if(!audWave) return; const bars=audWave.children,n=bars.length; for(let k=0;k<n;k++) bars[k].classList.toggle('on',(k+0.5)/n<=audProg); if(audPlay) audPlay.innerHTML=audPlaying?IC_PAUSE:IC_PLAY; }
+  function audStop(){ audPlaying=false; if(audRAF)cancelAnimationFrame(audRAF); audRAF=null; audRender(); }
+  function audReset(){ audStop(); audProg=0; audRender(); }
+  function audToggle(){ if(audPlaying){ audStop(); return; } audPlaying=true; audT0=performance.now()-audProg*DEMO*1000; const step=(t)=>{ audProg=Math.min(1,(t-audT0)/(DEMO*1000)); audRender(); if(audProg>=1){ audStop(); return; } audRAF=requestAnimationFrame(step); }; audRAF=requestAnimationFrame(step); audRender(); }
+
+  function render(id, fromIdx){
+    nodeId=id; blocks=buildBlocks(id); bi=0; si=0;
+    let h='<div class="nhead"><div class="nstrip"><button class="backbtn" data-c="back">'+SVG.back+'</button>'+
+          '<div class="nutil"><button class="util" data-c="book">'+SVG.book+'</button>'+
+          '<button class="util" data-c="share">'+SVG.share+'</button></div></div>'+
+          '<div class="jrow" id="njrowWrap"></div></div>';
+    h+='<div class="stage"><div class="rcluster">'+
+         '<div class="bhead"><div class="bglyph"></div><div class="bey"></div><div class="btitle"></div></div>'+
+         '<div class="aud hide"><button class="aud-play"></button><div class="aud-wave"></div><div class="aud-time"></div></div>'+
+         '<div class="carousel"><div class="track"></div></div>'+
+       '</div>'+
+       '<div class="dots"></div>'+
+       '<div class="bar">'+
+         '<button class="navpill prev"><span class="arw">&larr;</span> PREV</button>'+
+         '<button class="navpill next"><span class="lab"><span class="nx">Next</span><span class="nt"></span></span><span class="arw">&rarr;</span></button>'+
+       '</div></div>';
+    h+=periphery(id);
+    nodeEl.innerHTML=h;
+
+    stage=nodeEl.querySelector(".stage");
+    carousel=nodeEl.querySelector(".carousel");
+    track=nodeEl.querySelector(".track");
+    dots=nodeEl.querySelector(".dots");
+    navPrev=nodeEl.querySelector(".navpill.prev");
+    navNext=nodeEl.querySelector(".navpill.next");
+    bookBtn=nodeEl.querySelector('[data-c="book"]');
+    shareBtn=nodeEl.querySelector('[data-c="share"]');
+    audEl=nodeEl.querySelector('.aud'); audPlay=nodeEl.querySelector('.aud-play'); audWave=nodeEl.querySelector('.aud-wave'); audTime=nodeEl.querySelector('.aud-time');
+    buildWave();
+
+    wire();
+    drawJRow(id, fromIdx);
+    showBlock(0,0, fromIdx===undefined);
+  }
+
+  // journey row: all nodes on the track, focus emphasized, sign under the name,
+  // an active transit shows a soft ring (never a dip that hides the label)
+  function drawJRow(focusId, fromIdx){
+    const wrap=document.getElementById("njrowWrap"); if(!wrap) return;
+    const W=wrap.clientWidth||((SC.clientWidth||360)-24), H=74;
+    const cx=W/2, railY=22, SP=Math.min(46,(W-48)/6);
+    const fi=Math.max(0,IDS.indexOf(focusId));
+    const hasT=!!TRANSITS.find(x=>x.node===focusId);
+    let inner='<line class="jr-rail" x1="16" y1="'+railY+'" x2="'+(W-16)+'" y2="'+railY+'"/><g id="jrg">';
+    for(let i=0;i<M;i++){
+      const off=i-fi, x=cx+off*SP;
+      if(x<-14||x>W+14) continue;
+      const d=DEF[IDS[i]], focus=(i===fi);
+      if(focus){
+        if(hasT) inner+='<circle cx="'+x+'" cy="'+railY+'" r="15" fill="none" stroke="var(--mut)" stroke-width="1.2"><animate attributeName="r" values="13;18;13" dur="2.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.55;0.08;0.55" dur="2.8s" repeatCount="indefinite"/></circle>';
+        inner+='<circle cx="'+x+'" cy="'+railY+'" r="11" fill="var(--ink)"/>';
+        inner+='<text class="jr-glyph" x="'+x+'" y="'+(railY+4)+'">'+d.g+'</text>';
+        inner+='<text class="jr-name" x="'+x+'" y="'+(railY+30)+'">'+d.n.toUpperCase()+'</text>';
+        if(d.s) inner+='<text class="jr-sign" x="'+x+'" y="'+(railY+46)+'">'+d.s+'</text>';
+      }else{
+        const op=Math.max(0.18,1-Math.abs(off)*0.24);
+        inner+='<circle data-jump="'+IDS[i]+'" cx="'+x+'" cy="'+railY+'" r="5" fill="var(--mut)" opacity="'+op.toFixed(2)+'" style="cursor:pointer"/>';
+      }
+    }
+    inner+='</g>';
+    wrap.innerHTML='<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">'+inner+'</svg>';
+    if(fromIdx!==undefined && fromIdx!==fi){
+      const g=wrap.querySelector("#jrg"), initial=(fi-fromIdx)*SP;
+      g.style.transition="none"; g.style.transform="translateX("+initial+"px)";
+      requestAnimationFrame(()=>{ g.style.transition="transform .5s cubic-bezier(.34,1,.4,1)"; g.style.transform="translateX(0)"; });
+    }
+    wrap.querySelectorAll("[data-jump]").forEach(el=>el.addEventListener("click",()=>goToNode(el.dataset.jump)));
+  }
+
+  function setNext(nx,nt,arw){ navNext.querySelector(".nx").textContent=nx; navNext.querySelector(".nt").textContent=nt; navNext.querySelector(".arw").innerHTML=arw; }
+
+  function showBlock(i,startSlide,immediate){
+    const fill=()=>{
+      const b=blocks[i]; bi=i; si=startSlide||0;
+      nodeEl.querySelector(".bglyph").textContent=b.glyph||"";
+      nodeEl.querySelector(".bey").textContent=b.ey||"";
+      nodeEl.querySelector(".btitle").textContent=b.title||"";
+      track.innerHTML=b.slides.map(s=>'<div class="slide"><p>'+s+'</p></div>').join("");
+      dots.innerHTML=b.slides.map(()=> '<b></b>').join("");
+      if(b.audioLen){ audEl.classList.remove('hide'); audTime.textContent=b.audioLen; } else { audEl.classList.add('hide'); }
+      audReset();
+      bookBtn.classList.remove("on");
+      applySlide(true);
+      requestAnimationFrame(()=>{ stage.style.opacity="1"; });
+    };
+    if(immediate){ fill(); return; }
+    stage.style.opacity="0";
+    setTimeout(fill,140);
+  }
+
+  function applySlide(instant){
+    if(instant) track.style.transition="none";
+    track.style.transform="translateX("+(-si*100)+"%)";
+    if(instant) requestAnimationFrame(()=>{ track.style.transition=""; });
+    [...dots.children].forEach((d,k)=> d.className = k===si?"on":"");
+    const b=blocks[bi], last=si>=b.slides.length-1, lastBlock=bi>=blocks.length-1;
+    navPrev.classList.toggle("hide", bi===0);
+    navNext.classList.toggle("show", last);
+    if(last){
+      if(lastBlock){ const idx=Math.max(0,IDS.indexOf(nodeId)); setNext("Next", "Your "+DEF[IDS[(idx+1)%M]].n, "&rarr;"); }
+      else setNext("Next", blocks[bi+1].title, "&rarr;");
+    }
+  }
+
+  function nextSlide(){ if(si<blocks[bi].slides.length-1){ si++; applySlide(); } }
+  function advanceBlock(){ if(bi<blocks.length-1){ showBlock(bi+1,0); } else { openNext(); } }
+  function openNext(){ const idx=Math.max(0,IDS.indexOf(nodeId)); goToNode(IDS[(idx+1)%M]); }
+
+  function wire(){
+    nodeEl.querySelector('[data-c="back"]').addEventListener("click",close);
+    audPlay.addEventListener("click",audToggle);
+    bookBtn.addEventListener("click",()=>{ bookBtn.classList.toggle("on"); toast(bookBtn.classList.contains("on")?"Bookmarked.":"Removed bookmark."); });
+    shareBtn.addEventListener("click",()=>toast("Share this insight."));
+    navPrev.addEventListener("click",()=>{ if(bi>0) showBlock(bi-1,0); });
+    navNext.addEventListener("click",advanceBlock);
+
+    carousel.addEventListener("click",()=>{ if(!suppressClick) nextSlide(); });
+    let sx=0,dx=0,drag=false,moved=false,w=0;
+    carousel.addEventListener("pointerdown",e=>{ drag=true;moved=false;sx=e.clientX;w=carousel.clientWidth||300;track.style.transition="none"; try{carousel.setPointerCapture(e.pointerId);}catch(_){}} );
+    carousel.addEventListener("pointermove",e=>{ if(!drag)return; dx=e.clientX-sx; if(Math.abs(dx)>5)moved=true; track.style.transform="translateX(calc("+(-si*100)+"% + "+dx+"px))"; });
+    const end=()=>{ if(!drag)return; drag=false; track.style.transition=""; const n=blocks[bi].slides.length;
+      if(dx<-w*0.16 && si<n-1) si++; else if(dx>w*0.16 && si>0) si--; dx=0; applySlide();
+      if(moved){ suppressClick=true; setTimeout(()=>suppressClick=false,70); } };
+    carousel.addEventListener("pointerup",end);
+    carousel.addEventListener("pointercancel",end);
+
+    nodeEl.querySelectorAll(".pcta[data-act]").forEach(el=>{
+      el.addEventListener("click",()=>{
+        const a=el.dataset.act;
+        if(a==="transit"){ const t=TRANSITS.find(x=>x.node===nodeId); close(); if(t){ animatePlayhead(t.peak); const i=IDS.indexOf(t.node); if(i>=0){ let dd=((i-journey)%M+M)%M; if(dd>M/2)dd-=M; animateJourney(journey+dd);} } return; }
+        if(a==="bond") return toast("Starting a new Bond.");
+        if(a==="learn") return toast("Astro 101: what the "+DEF[nodeId].n+" governs.");
+        if(a==="archetype") return toast("The "+DEF[nodeId].s+" archetype.");
+        if(a==="shares") return toast("Scanning your Bonds for shared placements.");
+        if(a==="continue") return openNext();
+      });
+    });
+  }
+
+  // enter from the spiral: full dive-in, background recedes
+  function enterNode(id){
+    render(id);
+    SC.style.overflow="hidden";
+    screenEl.classList.add("diving");
+    requestAnimationFrame(()=>{ scrim.classList.add("on"); nodeEl.classList.add("open"); nodeEl.scrollTop=0; });
+  }
+  // node to node: keep the dive, slide the row, swap the reader
+  function goToNode(id){
+    const fromIdx=Math.max(0,IDS.indexOf(nodeId)), idx=IDS.indexOf(id);
+    let dd=((idx-journey)%M+M)%M; if(dd>M/2)dd-=M; animateJourney(journey+dd);
+    render(id, fromIdx);
+    SC.style.overflow="hidden";
+    requestAnimationFrame(()=>{ scrim.classList.add("on"); nodeEl.classList.add("open"); });
+    nodeEl.scrollTop=0;
+  }
+  function close(){ audStop(); nodeEl.classList.remove("open"); scrim.classList.remove("on"); screenEl.classList.remove("diving"); SC.style.overflow=""; }
+
+  function focalId(){ return IDS[((Math.round(journey)%M)+M)%M]; }
+  document.getElementById("cardZone").addEventListener("click",e=>{ if(e.target.closest(".jcard")) enterNode(focalId()); });
+
+  // tap a spiral node itself to dive in. capture the id at press time, because the
+  // wheel repaints every frame and a click's target would otherwise be a stale element.
+  let downId=null,dX=0,dY=0,movedS=false;
+  svgWrap.addEventListener("pointerdown",e=>{ dX=e.clientX; dY=e.clientY; movedS=false; const g=e.target.closest?e.target.closest("[data-nodeid]"):null; downId=g?g.dataset.nodeid:null; });
+  svgWrap.addEventListener("pointermove",e=>{ if(Math.abs(e.clientX-dX)>6||Math.abs(e.clientY-dY)>6) movedS=true; });
+  svgWrap.addEventListener("pointercancel",()=>{ downId=null; });
+  svgWrap.addEventListener("pointerup",()=>{ const id=downId; downId=null; if(movedS||!id) return; const idx=IDS.indexOf(id); let dd=((idx-journey)%M+M)%M; if(dd>M/2)dd-=M; animateJourney(journey+dd); enterNode(id); });
+
+  scrim.addEventListener("click",close);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&nodeEl.classList.contains("open")) close(); });
+
+  let tT; const tEl=document.getElementById("nToast");
+  function toast(m){ tEl.textContent=m; tEl.classList.add("on"); clearTimeout(tT); tT=setTimeout(()=>tEl.classList.remove("on"),2100); }
+})();
+
+</script>
+</div><!-- #screen -->
+</body>
+</html>
