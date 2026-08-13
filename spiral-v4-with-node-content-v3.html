@@ -107,16 +107,18 @@
   .track{display:flex;align-items:flex-start;transition:transform .34s cubic-bezier(.4,0,.2,1);}
   .slide{flex:0 0 100%;}
   .slide p{font-size:20px;line-height:1.5;color:var(--ink);margin:0;}
-  .dots{display:flex;gap:8px;justify-content:center;margin:6px 0 14px;}
+  .dots{display:flex;gap:8px;justify-content:center;margin:6px 0 12px;}
   .dots b{width:8px;height:8px;border-radius:50%;background:var(--line);display:block;transition:background .3s,width .3s;}
   .dots b.on{background:var(--ink);width:24px;border-radius:4px;}
-  .aud{display:flex;align-items:center;gap:12px;margin:14px 0 2px;padding:9px 13px;border:1px solid var(--line);border-radius:14px;background:var(--card);}
+  .aud{display:flex;align-items:center;gap:13px;margin:16px 0 0;}
   .aud.hide{display:none;}
-  .aud-play{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0;}
-  .aud-wave{flex:1;display:flex;align-items:center;gap:2px;height:26px;}
+  .aud-play{width:34px;height:34px;border-radius:50%;background:none;border:1.5px solid var(--ink);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0;}
+  .aud-body{flex:1;min-width:0;}
+  .aud-title{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .aud-wave{display:flex;align-items:center;gap:2px;height:20px;}
   .aud-wave i{flex:1;min-width:2px;border-radius:1px;background:var(--line);transition:background .12s;}
   .aud-wave i.on{background:var(--ink);}
-  .aud-time{font-size:12px;color:var(--mut);flex:0 0 auto;}
+  .aud-time{font-size:12px;color:var(--mut);flex:0 0 auto;align-self:flex-end;}
   .bar{display:flex;align-items:center;gap:10px;padding-top:14px;}
   .navpill{display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 17px;font:inherit;font-size:13px;cursor:pointer;background:none;}
   .navpill .arw{font-size:14px;}
@@ -717,11 +719,11 @@ boot();
 
   let blocks=[], bi=0, si=0, nodeId=null, suppressClick=false;
   let stage,track,dots,carousel,navPrev,navNext,bookBtn,shareBtn;
-  let audEl,audPlay,audWave,audTime,audProg=0,audRAF=null,audPlaying=false,audT0=0;
+  let audEl,audPlay,audWave,audTime,audTitle,audProg=0,audRAF=null,audPlaying=false,audT0=0;
   const DEMO=16;
   const IC_PLAY='<svg width="11" height="13" viewBox="0 0 11 13"><path d="M0 0 L11 6.5 L0 13 Z" fill="currentColor"/></svg>';
   const IC_PAUSE='<svg width="10" height="12" viewBox="0 0 10 12"><rect x="0" y="0" width="3.2" height="12" fill="currentColor"/><rect x="6.8" y="0" width="3.2" height="12" fill="currentColor"/></svg>';
-  function buildWave(){ if(!audWave) return; let w=''; const N=34; for(let k=0;k<N;k++){ const h=Math.min(24,6+Math.round((Math.sin(k*0.9)*0.5+0.5)*16)+((k*7)%5)); w+='<i style="height:'+h+'px"></i>'; } audWave.innerHTML=w; }
+  function buildWave(){ if(!audWave) return; let w=''; const N=34; for(let k=0;k<N;k++){ const h=Math.min(18,5+Math.round((Math.sin(k*0.9)*0.5+0.5)*12)+((k*7)%4)); w+='<i style="height:'+h+'px"></i>'; } audWave.innerHTML=w; }
   function audRender(){ if(!audWave) return; const bars=audWave.children,n=bars.length; for(let k=0;k<n;k++) bars[k].classList.toggle('on',(k+0.5)/n<=audProg); if(audPlay) audPlay.innerHTML=audPlaying?IC_PAUSE:IC_PLAY; }
   function audStop(){ audPlaying=false; if(audRAF)cancelAnimationFrame(audRAF); audRAF=null; audRender(); }
   function audReset(){ audStop(); audProg=0; audRender(); }
@@ -733,9 +735,10 @@ boot();
           '<div class="nutil"><button class="util" data-c="book">'+SVG.book+'</button>'+
           '<button class="util" data-c="share">'+SVG.share+'</button></div></div>'+
           '<div class="jrow" id="njrowWrap"></div></div>';
-    h+='<div class="stage"><div class="rcluster">'+
+    h+='<div class="stage">'+
+         '<div class="aud hide"><button class="aud-play"></button><div class="aud-body"><div class="aud-title"></div><div class="aud-wave"></div></div><div class="aud-time"></div></div>'+
+         '<div class="rcluster">'+
          '<div class="bhead"><div class="bglyph"></div><div class="bey"></div><div class="btitle"></div></div>'+
-         '<div class="aud hide"><button class="aud-play"></button><div class="aud-wave"></div><div class="aud-time"></div></div>'+
          '<div class="carousel"><div class="track"></div></div>'+
        '</div>'+
        '<div class="dots"></div>'+
@@ -754,7 +757,7 @@ boot();
     navNext=nodeEl.querySelector(".navpill.next");
     bookBtn=nodeEl.querySelector('[data-c="book"]');
     shareBtn=nodeEl.querySelector('[data-c="share"]');
-    audEl=nodeEl.querySelector('.aud'); audPlay=nodeEl.querySelector('.aud-play'); audWave=nodeEl.querySelector('.aud-wave'); audTime=nodeEl.querySelector('.aud-time');
+    audEl=nodeEl.querySelector('.aud'); audPlay=nodeEl.querySelector('.aud-play'); audWave=nodeEl.querySelector('.aud-wave'); audTime=nodeEl.querySelector('.aud-time'); audTitle=nodeEl.querySelector('.aud-title');
     buildWave();
 
     wire();
@@ -806,7 +809,7 @@ boot();
       nodeEl.querySelector(".btitle").textContent=b.title||"";
       track.innerHTML=b.slides.map(s=>'<div class="slide"><p>'+s+'</p></div>').join("");
       dots.innerHTML=b.slides.map(()=> '<b></b>').join("");
-      if(b.audioLen){ audEl.classList.remove('hide'); audTime.textContent=b.audioLen; } else { audEl.classList.add('hide'); }
+      if(b.audioLen){ audEl.classList.remove('hide'); audTitle.textContent='Listen \u00b7 '+b.title; audTime.textContent=b.audioLen; } else { audEl.classList.add('hide'); }
       audReset();
       bookBtn.classList.remove("on");
       applySlide(true);
