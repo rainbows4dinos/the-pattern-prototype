@@ -10,17 +10,20 @@
     --lift:#FFFDF7;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html{height:100%;}
-  body{margin:0;padding:0;height:100%;overflow:hidden;background:#D6CEBF;color:var(--ink);
+  html{height:auto;}
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    -webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;}
-  #screen{position:relative;width:min(390px,100vw);height:min(844px,100dvh);background:var(--bg);overflow:hidden;transform:translateZ(0);}
-  #scroller{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:none;}
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  #screen{position:relative;width:100%;background:var(--bg);}
+  #scroller{position:static;}
   @media (min-width:430px) and (min-height:520px){
-    #screen{border-radius:34px;box-shadow:0 22px 60px rgba(42,35,32,.30),0 0 0 1px rgba(42,35,32,.05);}
+    html{height:100%;}
+    body{height:100%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#D6CEBF;}
+    #screen{width:min(390px,100vw);height:min(844px,100dvh);overflow:hidden;transform:translateZ(0);border-radius:34px;box-shadow:0 22px 60px rgba(42,35,32,.30),0 0 0 1px rgba(42,35,32,.05);}
+    #scroller{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:none;}
   }
   #header{position:fixed;top:0;left:0;right:0;z-index:20;overflow:hidden;
-    background:var(--bg);touch-action:none;}
+    background:var(--bg);touch-action:pan-y;}
   #svgWrap{width:100%;height:100%;}
   #hint{position:absolute;left:0;right:0;text-align:center;
     font-size:11.5px;letter-spacing:.03em;color:var(--mut);pointer-events:none;}
@@ -274,7 +277,10 @@ const header=document.getElementById("header");
 const svgWrap=document.getElementById("svgWrap");
 const cardZone=document.getElementById("cardZone");
 const sheetEl=document.getElementById("sheet");
-const SC=document.getElementById("scroller");
+const FRAMED=window.matchMedia("(min-width:430px) and (min-height:520px)").matches;
+const _scEl=document.getElementById("scroller");
+const _winEl=(document.scrollingElement||document.documentElement);
+const SC={ get scrollTop(){return FRAMED?_scEl.scrollTop:(window.pageYOffset||_winEl.scrollTop||0);}, set scrollTop(v){ if(FRAMED)_scEl.scrollTop=v; else window.scrollTo(0,v); }, get clientHeight(){return FRAMED?_scEl.clientHeight:window.innerHeight;}, get clientWidth(){return FRAMED?_scEl.clientWidth:window.innerWidth;}, on(t,f,o){(FRAMED?_scEl:window).addEventListener(t,f,o);}, lock(on){(FRAMED?_scEl:document.body).style.overflow=on?"hidden":"";} };
 function updateSheet(){
   const w=header.clientWidth;
   const focalRest=H0*0.30+Math.min(H0*0.30,w*0.40);
@@ -566,7 +572,7 @@ function scheduleWheel(){
   if(wheelQueued) return; wheelQueued=true;
   requestAnimationFrame(()=>{ wheelQueued=false; drawWheel(SC.scrollTop); });
 }
-SC.addEventListener("scroll",()=>{ updateSheet(); scheduleWheel(); },{passive:true});
+SC.on("scroll",()=>{ updateSheet(); scheduleWheel(); },{passive:true});
 
 // continuous loop for breathing (at rest) and transit vibration
 function anyTension(){
@@ -600,7 +606,8 @@ function attachScrub(el){
       journey=journey-mdx/STEP_PX;
       const now=performance.now(); vel=(t.clientX-lastX)/(now-lastT+0.001); lastX=t.clientX; lastT=now;
       layoutCards(); scheduleWheel();
-    }else if(axis==="v"){ e.preventDefault(); SC.scrollTop-=mdy; }
+    }
+    // vertical falls through to native scrolling (touch-action:pan-y)
   },{passive:false});
   el.addEventListener("touchend",()=>{
     if(axis==="h"){ const target=Math.round(journey - clamp(vel,-2,2)*0.9); animateJourney(target); }
@@ -660,7 +667,6 @@ boot();
 (function(){
   const nodeEl=document.getElementById("node");
   const scrim=document.getElementById("nodeScrim");
-  const SC=document.getElementById("scroller");
   const screenEl=document.getElementById("screen");
   const svgWrap=document.getElementById("svgWrap");
 
@@ -959,7 +965,7 @@ boot();
   // enter from the spiral: full dive-in, background recedes
   function enterNode(id){
     render(id);
-    SC.style.overflow="hidden";
+    SC.lock(true);
     screenEl.classList.add("diving");
     requestAnimationFrame(()=>{ scrim.classList.add("on"); nodeEl.classList.add("open"); nodeEl.scrollTop=0; });
   }
@@ -968,11 +974,11 @@ boot();
     const fromIdx=Math.max(0,IDS.indexOf(nodeId)), idx=IDS.indexOf(id);
     let dd=((idx-journey)%M+M)%M; if(dd>M/2)dd-=M; animateJourney(journey+dd);
     render(id, fromIdx);
-    SC.style.overflow="hidden";
+    SC.lock(true);
     requestAnimationFrame(()=>{ scrim.classList.add("on"); nodeEl.classList.add("open"); });
     nodeEl.scrollTop=0;
   }
-  function close(){ audStop(); stopJitter(); if(ptlIO){ ptlIO.disconnect(); ptlIO=null; } updateStrain(0); nodeEl.classList.remove("open"); scrim.classList.remove("on"); screenEl.classList.remove("diving"); SC.style.overflow=""; }
+  function close(){ audStop(); stopJitter(); if(ptlIO){ ptlIO.disconnect(); ptlIO=null; } updateStrain(0); nodeEl.classList.remove("open"); scrim.classList.remove("on"); screenEl.classList.remove("diving"); SC.lock(false); }
 
   function focalId(){ return IDS[((Math.round(journey)%M)+M)%M]; }
   document.getElementById("cardZone").addEventListener("click",e=>{ if(e.target.closest(".jcard")) enterNode(focalId()); });
