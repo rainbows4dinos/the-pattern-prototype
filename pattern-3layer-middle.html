@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Your Pattern — middle feeder</title>
+<style>
+  :root{
+    --bg:#F3EEE4; --card:#FBF8F1; --ink:#2A2320; --mut:#8C8175; --line:#E0D7C8;
+    --lift:#FFFDF7; --body:#5c534b;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  body{display:flex;align-items:center;justify-content:center;min-height:100dvh;}
+  #screen{position:relative;width:100%;min-height:100dvh;background:var(--bg);overflow:hidden;}
+  @media (min-width:540px) and (min-height:600px){
+    body{background:#D6CEBF;height:100dvh;overflow:hidden;}
+    #screen{width:390px;height:844px;min-height:0;border-radius:34px;
+      box-shadow:0 22px 60px rgba(42,35,32,.30),0 0 0 1px rgba(42,35,32,.05);}
+  }
+  .layer{position:absolute;inset:0;overflow:hidden;}
+  .hidden{display:none;}
+
+  .statusbar{height:calc(env(safe-area-inset-top,0px) + 14px);}
+  .toolbar{display:flex;align-items:center;gap:10px;padding:6px 16px 8px;}
+  .round{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);
+    display:flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer;padding:0;font-size:17px;flex:0 0 auto;}
+  .tbtitle{font-weight:600;font-size:16px;white-space:nowrap;}
+  .tbspacer{flex:1;}
+
+  /* LAYER 1 */
+  #l1 .spiralwrap{position:absolute;left:0;right:0;top:110px;bottom:150px;display:flex;align-items:center;justify-content:center;}
+  #l1 svg{width:100%;max-width:390px;display:block;}
+  #l1 .l1hint{position:absolute;left:0;right:0;bottom:118px;text-align:center;color:var(--mut);font-size:13px;}
+  #l1 .begin{position:absolute;left:50%;transform:translateX(-50%);bottom:60px;background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:14px 26px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;}
+
+  /* LAYER 2 strip */
+  #strip{padding:2px 0 12px;overflow:hidden;position:relative;}
+  #strip .rail{position:absolute;left:0;right:0;top:26px;height:1px;background:var(--line);}
+  #stripRow{display:flex;align-items:flex-start;padding:0 12px;position:relative;}
+  .snode{flex:0 0 auto;width:56px;display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+  .snode .dot{width:26px;height:26px;border-radius:50%;border:1px solid var(--mut);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--mut);}
+  .snode.on .dot{width:38px;height:38px;background:var(--ink);color:var(--bg);border-color:var(--ink);font-size:17px;margin-top:-6px;}
+  .snode .nm{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:5px;}
+  .snode .sg{font-size:10px;color:var(--ink);font-weight:600;}
+  .snode.on .nm{color:var(--ink);}
+
+  #feedZone{position:absolute;left:0;right:0;overflow:hidden;}
+  #feedZone.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  #feed{position:relative;transition:transform .44s cubic-bezier(.34,1,.4,1);}
+  #feedZone.scroll #feed{transition:none;transform:none!important;}
+
+  .pcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:22px;margin:0 12px 14px;padding:18px;
+    display:flex;flex-direction:column;overflow:hidden;transition:transform .34s ease,opacity .34s ease;}
+  .pcard.collapsing{transform:scale(.965);opacity:.5;}
+  .ptag{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .ptag .badge{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--mut);}
+  .ptag .badge.flag{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+  .ptag .mins{font-size:12px;color:var(--mut);}
+  .phero{height:128px;border-radius:14px;background:linear-gradient(135deg,#efe8da,#e6ddcc);display:flex;align-items:center;justify-content:center;margin-bottom:16px;color:var(--mut);flex:0 0 auto;}
+  .phero.tall{height:146px;}
+  .peyebrow{font-size:12px;letter-spacing:.06em;color:var(--mut);margin-bottom:6px;}
+  .ptitle{font-family:var(--serif);font-weight:400;font-size:29px;line-height:1.12;letter-spacing:-.01em;margin:0 0 12px;padding-right:52px;}
+  .pbody{font-size:16px;line-height:1.55;color:var(--body);margin:0;padding-right:52px;}
+  .pcard .foot{padding-top:40px;}
+  .pcta{display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:13px 22px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+  .pcta.ghost{background:none;color:var(--ink);border:1px solid var(--line);}
+  .pcta .arw{font-size:15px;}
+  .youthem{display:flex;align-items:center;gap:10px;}
+  .youthem .av{width:56px;height:56px;border-radius:50%;background:var(--bg);border:1px solid var(--line);}
+  .youthem .amp{font-family:var(--serif);font-size:24px;color:var(--mut);}
+
+  #nextpill{position:absolute;left:50%;bottom:calc(58px + env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);z-index:10;
+    background:var(--lift);border:1px solid var(--line);border-radius:14px;
+    padding:8px 16px;text-align:center;cursor:pointer;max-width:230px;
+    box-shadow:0 6px 18px rgba(42,35,32,.12);opacity:1;transition:opacity .3s ease,transform .3s ease;}
+  #nextpill .nx{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:1px;}
+  #nextpill .nt{font-size:13px;font-weight:600;color:var(--ink);line-height:1.2;display:block;}
+  #nextpill .ar{font-size:13px;color:var(--ink);line-height:1.1;display:block;margin-top:1px;}
+  #nextpill.hide{opacity:0;transform:translateX(-50%) translateY(6px);pointer-events:none;}
+
+  #fabs{position:absolute;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px) + 10px);z-index:9;display:flex;flex-direction:column;gap:9px;}
+  .fab{width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--bg);border:none;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;opacity:.92;padding:0;}
+
+  .tabbar{position:absolute;left:0;right:0;bottom:0;height:calc(58px + env(safe-area-inset-bottom,0px));
+    display:flex;align-items:center;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);}
+  .tabbar .pillbar{display:flex;gap:22px;background:var(--ink);border-radius:999px;padding:12px 20px;box-shadow:0 6px 20px rgba(42,35,32,.22);}
+  .tabbar .ti{width:22px;height:22px;color:var(--bg);opacity:.8;display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .tabbar .ti.me{width:30px;height:30px;border-radius:50%;background:var(--bg);opacity:1;margin:-4px 0;}
+
+  #sheetScrim{position:absolute;inset:0;background:rgba(42,35,32,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:30;}
+  #sheetScrim.open{opacity:1;pointer-events:auto;}
+  #sheet{position:absolute;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:22px 22px 0 0;
+    transform:translateY(101%);transition:transform .3s cubic-bezier(.34,1.06,.4,1);padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px));max-height:70%;overflow:auto;}
+  #sheet.open{transform:translateY(0);}
+  #sheet .grab{width:36px;height:4px;border-radius:4px;background:var(--line);margin:4px auto 12px;}
+  #sheet h3{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:0 0 6px;padding:0 20px;}
+  .sitem{display:flex;gap:12px;align-items:baseline;padding:13px 20px;border-top:1px solid var(--line);cursor:pointer;}
+  .sitem .n{color:var(--mut);font-size:13px;width:16px;}
+  .sitem .t{font-size:16px;}
+  .sitem.on .t{font-weight:600;}
+  .sitem .t small{display:block;color:var(--mut);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:3px;}
+
+  /* LAYER 3 */
+  #l3{z-index:40;background:var(--bg);transform:scale(1.04);opacity:0;transition:opacity .32s ease,transform .34s cubic-bezier(.34,1,.4,1);pointer-events:none;}
+  #l3.show{opacity:1;transform:scale(1);pointer-events:auto;}
+  #rtrackWrap{position:absolute;left:0;right:0;top:112px;bottom:96px;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scrollbar-width:none;}
+  #rtrackWrap::-webkit-scrollbar{display:none;}
+  .rslide{flex:0 0 100%;scroll-snap-align:start;height:100%;padding:14px 30px;display:flex;flex-direction:column;justify-content:center;}
+  .rslide .reyebrow{font-size:12px;letter-spacing:.06em;color:var(--mut);margin-bottom:14px;}
+  .rslide h2{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;margin:0 0 22px;}
+  .rslide p{font-size:19px;line-height:1.6;color:var(--ink);margin:0;}
+  .pcard.locked{border-style:dashed;}
+  .pcard.locked .phero{background:linear-gradient(135deg,#e9e2d4,#dcd2c0);opacity:.85;}
+  .pcard.locked .ptitle,.pcard.locked .pbody{opacity:.7;}
+  .lockmark{position:absolute;top:16px;right:16px;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;}
+  #rdots{position:absolute;left:0;right:0;bottom:80px;z-index:3;display:flex;gap:7px;justify-content:center;pointer-events:none;}
+  #rdots b{width:8px;height:8px;border-radius:50%;background:var(--line);display:block;}
+  #rdots b.on{background:var(--ink);width:22px;border-radius:4px;}
+  .rslide.end{align-items:center;justify-content:center;text-align:center;gap:12px;}
+  .rslide.end .done{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;}
+  .rslide.end h2{margin-bottom:20px;}
+  .rslide.end .pcta{width:min(320px,86%);justify-content:center;}
+
+  @media (prefers-reduced-motion:reduce){#feed,.pcard,#l3{transition:none!important;} #rtrackWrap{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+<div id="screen">
+
+  <!-- LAYER 1 -->
+  <div class="layer" id="l1">
+    <div class="statusbar"></div>
+    <div class="toolbar"><span class="tbtitle">Your Pattern</span><span class="tbspacer"></span><button class="round">&#9906;</button></div>
+    <div class="spiralwrap"><svg id="l1svg" viewBox="0 0 390 400"></svg></div>
+    <div class="l1hint">Tap your Moon to step in</div>
+    <button class="begin" id="beginBtn">Enter your Moon</button>
+  </div>
+
+  <!-- LAYER 2 -->
+  <div class="layer hidden" id="l2">
+    <div class="statusbar"></div>
+    <div class="toolbar">
+      <button class="round" id="l2back">&#8249;</button>
+      <span class="tbtitle">Your Pattern</span>
+      <span class="tbspacer"></span>
+    </div>
+    <div id="strip"><div class="rail"></div><div id="stripRow"></div></div>
+    <div id="feedZone"><div id="feed"></div></div>
+    <div id="nextpill"><span class="nx">Next</span><span class="nt"></span><span class="ar">&#8595;</span></div>
+    <div id="fabs">
+      <button class="fab" id="listFab" title="Chapters">&#9776;</button>
+    </div>
+    <div class="tabbar"><div class="pillbar"><span class="ti">&#9737;</span><span class="ti">&#9789;</span><span class="ti me"></span><span class="ti">&#9775;</span><span class="ti">&#9906;</span></div></div>
+    <div id="sheetScrim"></div>
+    <div id="sheet"><div class="grab"></div><h3>Your Gemini Moon &middot; the reading</h3><div id="sheetList"></div></div>
+  </div>
+
+  <!-- LAYER 3 -->
+  <div class="layer hidden" id="l3">
+    <div class="statusbar"></div>
+    <div class="toolbar"><button class="round" id="l3back">&#8249;</button><span class="tbtitle" id="l3title">Reader</span><span class="tbspacer"></span></div>
+    <div id="rtrackWrap"></div>
+    <div id="rdots"></div>
+    <div class="tabbar"><div class="pillbar"><span class="ti">&#9737;</span><span class="ti">&#9789;</span><span class="ti me"></span><span class="ti">&#9775;</span><span class="ti">&#9906;</span></div></div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const screenEl=$("#screen");
+
+const NODES=[
+  {g:"\u263D",n:"Moon",s:"Gemini"},{g:"\u2640",n:"Venus",s:"Leo"},
+  {g:"\u2642",n:"Mars",s:"Aries"},{g:"Dc",n:"Descendant",s:"Libra"},
+  {g:"\u2643",n:"Jupiter",s:"Pisces"},{g:"\u263F",n:"Mercury",s:"Taurus"},
+  {g:"Mc",n:"Midheaven",s:"Aqua"},{g:"Ic",n:"Imum Coeli",s:"Leo"},
+  {g:"Ac",n:"Ascendant",s:"Scorpio"}
+];
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function glyphSVG(g,x,y,size,fill,op){
+  const fs=(g.length>1?size*0.8:size*1.02);
+  return '<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="middle" dominant-baseline="central" font-size="'+fs.toFixed(1)+'" font-weight="600" fill="'+fill+'" opacity="'+op+'" font-family="var(--sans)">'+g+'</text>';
+}
+function drawL1(){
+  // log spiral (ported from opt2): journey begins at the Moon in the foreground and
+  // winds inward, shrinking toward a glowing horizon eye. Nodes scale by perspective.
+  const svg=$("#l1svg"), wrap=svg.parentElement;
+  const W=Math.min(390, wrap.clientWidth||360);
+  const Hd=Math.min(wrap.clientHeight||520, Math.round(W*1.34));
+  const cx=W/2, M=NODES.length;
+  const GROW_F=1.42, GROW_P=1.95, TURN=1.1, BEHIND=0.5;   // start of journey: nothing behind, so no loom
+  const R0S=W*0.40, Yeye=Hd*0.32;
+
+  const items=[];
+  for(let i=0;i<M;i++){
+    const fd=((i)%M+M)%M;
+    const d=fd>M-BEHIND?fd-M:fd;
+    const g=d>=0?GROW_F:GROW_P;
+    const rho=R0S*Math.pow(g,-d);
+    const ang=d*TURN;
+    const x=cx+rho*Math.sin(ang), y=Yeye+rho*Math.cos(ang);
+    const psc=clamp(rho/R0S,0.015,7);
+    const blur=d<0?clamp((psc-1)*2.6,0,10):0;
+    const wrapFade=clamp((M-BEHIND-d)/1.4,0,1)*clamp((d+BEHIND)/0.8,0,1);
+    const op=wrapFade*clamp((7.6-psc)/1.4,0,1);
+    if(op<0.02) continue;
+    const f=clamp(1-Math.abs(d)/0.7,0,1);
+    const r=Math.max(24*psc,2.8);
+    items.push({i,d,x,y,r,f,op,blur,psc});
+  }
+  items.sort((a,b)=>a.psc-b.psc);   // far/small first, near/large on top
+
+  let defs='<radialGradient id="eye" cx="50%" cy="'+(Yeye/Hd*100).toFixed(1)+'%" r="54%">'+
+    '<stop offset="0%" stop-color="#FFFDF8" stop-opacity="0.95"/>'+
+    '<stop offset="30%" stop-color="#FFFBF0" stop-opacity="0.5"/>'+
+    '<stop offset="70%" stop-color="#FBF4E6" stop-opacity="0.12"/>'+
+    '<stop offset="100%" stop-color="#FBF4E6" stop-opacity="0"/></radialGradient>';
+  items.forEach(it=>{ if(it.blur>0.15) defs+='<filter id="bl'+it.i+'" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="'+it.blur.toFixed(2)+'"/></filter>'; });
+
+  let s='<defs>'+defs+'</defs>';
+  s+='<rect x="0" y="0" width="'+W+'" height="'+Hd+'" fill="url(#eye)"/>';
+
+  // tapered coil: thick in the foreground, hairline at the eye
+  let seg='', prev=null;
+  for(let ss=-0.9; ss<=9.4; ss+=0.05){
+    const g=ss>=0?GROW_F:GROW_P, rr=R0S*Math.pow(g,-ss);
+    if(rr>R0S*4.2||rr<R0S*0.012){ prev=null; continue; }
+    const aa=ss*TURN, x=cx+rr*Math.sin(aa), y=Yeye+rr*Math.cos(aa);
+    if(prev){ const w=clamp(rr/R0S*6.2,0.8,20);
+      seg+='<line x1="'+prev.x.toFixed(1)+'" y1="'+prev.y.toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke-width="'+w.toFixed(2)+'"/>'; }
+    prev={x,y};
+  }
+  s+='<g stroke="var(--line)" stroke-linecap="round" opacity="0.55">'+seg+'</g>';
+
+  items.forEach(it=>{
+    const nd=NODES[it.i], fo=it.blur>0.15?' filter="url(#bl'+it.i+')"':'';
+    s+='<g'+fo+' data-i="'+it.i+'" style="cursor:pointer">';
+    s+='<circle cx="'+it.x.toFixed(1)+'" cy="'+it.y.toFixed(1)+'" r="'+it.r.toFixed(1)+'" fill="var(--card)" stroke="var(--ink)" stroke-width="1.4" opacity="'+it.op.toFixed(3)+'"/>';
+    if(it.f>0.02) s+='<circle cx="'+it.x.toFixed(1)+'" cy="'+it.y.toFixed(1)+'" r="'+it.r.toFixed(1)+'" fill="var(--ink)" opacity="'+(it.f*it.op).toFixed(3)+'"/>';
+    const gsz=it.r*(nd.g.length>1?0.9:1.05);
+    if((1-it.f)>0.02) s+=glyphSVG(nd.g,it.x,it.y,gsz,'var(--ink)',((1-it.f)*it.op).toFixed(3));
+    if(it.f>0.02)     s+=glyphSVG(nd.g,it.x,it.y,gsz,'var(--bg)',(it.f*it.op).toFixed(3));
+    s+='</g>';
+    if(it.f>0.5){
+      s+='<text x="'+it.x.toFixed(1)+'" y="'+(it.y+it.r+18).toFixed(1)+'" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="var(--mut)" font-family="var(--sans)">'+nd.n.toUpperCase()+'</text>';
+      if(nd.s) s+='<text x="'+it.x.toFixed(1)+'" y="'+(it.y+it.r+33).toFixed(1)+'" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)" font-family="var(--sans)">'+nd.s+'</text>';
+    }
+  });
+
+  svg.setAttribute("viewBox","0 0 "+W+" "+Hd);
+  svg.innerHTML=s;
+  svg.querySelectorAll("[data-i]").forEach(g=>g.addEventListener("click",enterL2));
+}
+
+const HERO_MOON='<svg width="118" height="88" viewBox="0 0 118 88" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="59" cy="44" r="25"/><path d="M59 19a25 25 0 0 0 0 50 19 19 0 0 1 0-50z" fill="currentColor" stroke="none" opacity=".5"/></svg>';
+const HERO_BOLT='<svg width="88" height="88" viewBox="0 0 88 88" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M49 12 33 47h16l-8 29 29-41H55z"/></svg>';
+const HERO_KNOT='<svg width="108" height="78" viewBox="0 0 108 78" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M29 39c0-16 50-16 50 0s-50 16-50 0z"/><path d="M54 23c-16 0-16 32 0 32s16-32 0-32z"/></svg>';
+const HERO_RING='<svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="40" cy="40" r="27"/><text x="40" y="46" text-anchor="middle" font-size="22" fill="currentColor" stroke="none">\u2640</text></svg>';
+const HERO_LOCK='<svg width="72" height="86" viewBox="0 0 72 86" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="16" y="38" width="40" height="34" rx="6"/><path d="M24 38v-9a12 12 0 0 1 24 0v9"/><circle cx="36" cy="53" r="4" fill="currentColor" stroke="none"/></svg>';
+
+const CARDS=[
+  {type:"insight",flag:null,mins:"5 min",hero:HERO_MOON,tall:true,eyebrow:"Your Gemini Moon",title:"Confident & Grounded",
+   body:"You feel by narrating. Naming a thing is how you have it, so a feeling left unspoken barely counts yet. It makes you quick, warm, and genuinely curious about people.",cta:"Read insight",reader:"moon1"},
+  {type:"insight",flag:null,mins:"3 min",hero:HERO_MOON,eyebrow:"Your Gemini Moon",title:"You need air",
+   body:"A single mood held too long starts to feel like a room with no windows. You need variety the way other people need rest. That is how you keep your footing.",cta:"Read insight",reader:"moon2"},
+  {type:"transit",flag:"Active now",mins:"4 min",hero:HERO_BOLT,eyebrow:"Transit",title:"Uranus is crossing your Moon",
+   body:"For a stretch this year, the part of you that needs air gets louder. Moods turn over faster, routine wears thinner. It is the weather moving through your foundation right now.",cta:"See the timing",reader:"transit"},
+  {type:"tout",flag:null,mins:null,hero:"youthem",eyebrow:"Bring someone in",title:"See it between two charts",
+   body:"A Saturn and Moon contact is one of the most familiar tensions between two people. See whose chart it lands on.",cta:"Form your first Bond",reader:null},
+  {type:"insight",flag:"A knot here",mins:"4 min",hero:HERO_KNOT,eyebrow:"Your Gemini Moon",title:"The guarded heart",
+   body:"Where your Moon meets a harder edge, a feeling has to pass inspection before you will let it count. From outside it looks like composure. Inside it can be a coldness toward your own reactions.",cta:"Read insight",reader:"complex"},
+  {type:"locked",flag:"Premium",mins:null,hero:HERO_LOCK,eyebrow:"Your Gemini Moon",title:"The deepest cut",
+   body:"A deeper layer of this reading, written for exactly where you are right now.",cta:"Unlock with Premium",reader:null},
+  {type:"continue",flag:null,mins:null,hero:HERO_RING,eyebrow:"Next in your journey",title:"Your Venus",
+   body:"That is your Moon, the ground you stand on. Your Venus is next: how you reach for people, and what you decide is worth it.",cta:"Continue to your Venus",reader:null}
+];
+
+const READERS={
+  moon1:{title:"Confident & Grounded",eyebrow:"Your Gemini Moon",slides:[
+    "You process the world by talking about it. Naming a feeling is how you have it, and a thought left unspoken barely feels real yet.",
+    "You need variety the way other people need rest. A single mood, held too long, starts to feel like a room with no windows.",
+    "At your best you are quick, warm, and genuinely curious about people. The risk is talking yourself past a feeling before you have finished having it."]},
+  moon2:{title:"You need air",eyebrow:"Your Gemini Moon",slides:[
+    "Routine wears on you sooner than on most. That is not a flaw to fix. It is information about what keeps you steady.",
+    "The practice is telling the people close to you before the window opens, not after."]},
+  transit:{title:"Uranus on your Moon",eyebrow:"Transit",slides:[
+    "Uranus moves slowly, so this is less an event than a season. The familiar will feel less settled than usual.",
+    "It tends to build, hold, then ease. If you have felt restless lately, this is the part of your Pattern that is lit up."]},
+  complex:{title:"The guarded heart",eyebrow:"A complex",slides:[
+    "Before a feeling is allowed, some part of you checks whether it is justified, proportionate, grown up.",
+    "The steadiness underneath is real and worth keeping. The work is letting a feeling exist before you decide whether it earned the right."]}
+};
+
+const mode="paced";
+let focusIdx=0, cardH=0, GAP=14;
+const feedZone=$("#feedZone"), feed=$("#feed"), nextpill=$("#nextpill"), stripRow=$("#stripRow");
+
+function buildStrip(){
+  stripRow.innerHTML=NODES.map((n,i)=>
+    '<div class="snode'+(i===0?' on':'')+'"><div class="dot">'+n.g+'</div>'+
+    (i===0?'<div class="nm">'+n.n+'</div><div class="sg">'+n.s+'</div>':'<div class="nm">'+n.n.slice(0,3)+'</div>')+'</div>').join("");
+}
+function heroHTML(c){ return c.hero==="youthem"?'<div class="youthem"><span class="av"></span><span class="amp">&amp;</span><span class="av"></span></div>':c.hero; }
+function cardHTML(c,i){
+  let tag='<div class="ptag">';
+  if(c.flag) tag+='<span class="badge flag">'+c.flag+'</span>'; else if(c.type==="insight") tag+='<span class="badge">Unread</span>';
+  if(c.mins) tag+='<span class="mins">'+c.mins+'</span>';
+  tag+='</div>';
+  return '<div class="pcard'+(c.type==="locked"?" locked":"")+'" data-i="'+i+'" style="height:'+cardH+'px">'+
+    (c.type==="locked"?'<div class="lockmark">&#128274;</div>':'')+tag+
+    '<div class="phero'+(c.tall?' tall':'')+'">'+heroHTML(c)+'</div>'+
+    '<div class="peyebrow">'+c.eyebrow+'</div><div class="ptitle">'+c.title+'</div>'+
+    '<p class="pbody">'+c.body+'</p>'+
+    '<div class="foot"><button class="pcta'+((c.type==="tout"||c.type==="continue")?" ghost":"")+'" data-cta="'+i+'">'+c.cta+'</button></div></div>';
+}
+function measure(){
+  const H=screenEl.clientHeight;
+  const headerH=$("#l2 .statusbar").offsetHeight+$("#l2 .toolbar").offsetHeight+$("#strip").offsetHeight;
+  const peek=32;
+  const zoneH=H-headerH;
+  cardH=Math.max(300,zoneH-peek);
+  feedZone.style.top=headerH+"px"; feedZone.style.height=zoneH+"px";
+}
+function buildFeed(){
+  measure();
+  feed.innerHTML=CARDS.map(cardHTML).join("");
+  feed.querySelectorAll("[data-cta]").forEach(b=>b.addEventListener("click",e=>{
+    e.stopPropagation(); const c=CARDS[+b.dataset.cta];
+    if(c.reader) openReader(c.reader); else toast(c.type==="continue"?"Would advance to your Venus":c.type==="locked"?"Premium, would open the paywall":"Would open Bonds");
+  }));
+  applyMode(); goTo(focusIdx,true);
+}
+function applyMode(){
+  if(mode==="scroll"){ feedZone.classList.add("scroll"); feed.style.transform="none"; clearTimeout(pillTimer); nextpill.classList.add("hide"); }
+  else{ feedZone.classList.remove("scroll"); nextpill.classList.remove("hide"); goTo(focusIdx,true); }
+}
+function goTo(i,instant){
+  focusIdx=Math.max(0,Math.min(CARDS.length-1,i));
+  if(mode==="scroll") return;
+  if(instant) feed.style.transition="none";
+  feed.style.transform="translateY("+(-focusIdx*(cardH+GAP))+"px)";
+  if(instant) requestAnimationFrame(()=>feed.style.transition="");
+  updateNextPill();
+}
+function nextLabel(ni){
+  const c=CARDS[ni];
+  // stay inside the same placement -> soft "more of"; leaving it -> name the thing
+  if(c.type==="insight") return {nx:"More of", nt:"Your Moon"};
+  if(c.type==="transit") return {nx:"Next", nt:c.title.replace(/^.*?\b(is|on)\b/i,"").trim()||"a transit"};
+  if(c.type==="tout")    return {nx:"Next", nt:"a Bond"};
+  if(c.type==="locked")  return {nx:"Next", nt:"The deepest cut"};
+  if(c.type==="continue")return {nx:"Next", nt:"Your Venus"};
+  return {nx:"Next", nt:c.title};
+}
+let pillTimer=null;
+function updateNextPill(){
+  clearTimeout(pillTimer);
+  const ni=focusIdx+1;
+  if(mode==="scroll"||ni>CARDS.length-1){ nextpill.classList.add("hide"); return; }
+  const l=nextLabel(ni);
+  nextpill.querySelector(".nx").textContent=l.nx;
+  nextpill.querySelector(".nt").textContent=l.nt;
+  // hidden while the card settles, then eases in so the focal card reads first
+  nextpill.classList.add("hide");
+  pillTimer=setTimeout(()=>nextpill.classList.remove("hide"),1100);
+}
+function hidePill(){ clearTimeout(pillTimer); nextpill.classList.add("hide"); }
+function advance(dir){
+  if(mode==="scroll") return;
+  const t=focusIdx+dir;
+  if(t<0){ exitToL1(); return; }
+  if(t>CARDS.length-1){ toast("End of your Moon"); return; }
+  if(dir>0){ const lv=feed.querySelector('.pcard[data-i="'+focusIdx+'"]'); if(lv){ lv.classList.add("collapsing"); setTimeout(()=>lv.classList.remove("collapsing"),360); } }
+  goTo(t);
+}
+
+/* auto-cycle: a single served-next step, only when a reader is closed */
+function serveNext(){ if(mode==="paced" && focusIdx<CARDS.length-1) advance(1); }
+
+/* input */
+let ty0=null, tmoved=false;
+feedZone.addEventListener("touchstart",e=>{ if(mode!=="scroll"){ ty0=e.touches[0].clientY; tmoved=false; } },{passive:true});
+feedZone.addEventListener("touchmove",e=>{ if(ty0!=null && Math.abs(e.touches[0].clientY-ty0)>8 && !tmoved){ tmoved=true; hidePill(); } },{passive:true});
+feedZone.addEventListener("touchend",e=>{
+  if(mode==="scroll"||ty0==null) return;
+  const dy=e.changedTouches[0].clientY-ty0; ty0=null;
+  if(Math.abs(dy)<40) return;
+  advance(dy<0?1:-1);
+},{passive:true});
+feedZone.addEventListener("wheel",e=>{ if(mode!=="scroll"&&Math.abs(e.deltaY)>12){ hidePill(); advance(e.deltaY>0?1:-1);} },{passive:true});
+nextpill.addEventListener("click",()=>advance(1));
+
+
+/* insights sheet */
+const sheet=$("#sheet"), scrim=$("#sheetScrim");
+$("#listFab").addEventListener("click",()=>{
+  $("#sheetList").innerHTML=CARDS.map((c,i)=>{ const meta=c.type==="transit"?"Active now":c.type==="tout"?"Bond":c.type==="continue"?"Next":c.flag||"Insight";
+    return '<div class="sitem'+(i===focusIdx?' on':'')+'" data-j="'+i+'"><span class="n">'+(i+1)+'</span><span class="t">'+c.title+'<small>'+meta+'</small></span></div>'; }).join("");
+  $("#sheetList").querySelectorAll("[data-j]").forEach(el=>el.addEventListener("click",()=>{ closeSheet(); mode==="scroll"?scrollToCard(+el.dataset.j):goTo(+el.dataset.j); }));
+  scrim.classList.add("open"); sheet.classList.add("open");
+});
+function closeSheet(){ scrim.classList.remove("open"); sheet.classList.remove("open"); }
+scrim.addEventListener("click",closeSheet);
+function scrollToCard(i){ const el=feed.querySelectorAll(".pcard")[i]; if(el) feedZone.scrollTo({top:el.offsetTop-8,behavior:"smooth"}); }
+
+/* reader */
+let rslides=[], rIdx=0;
+const rw=$("#rtrackWrap"), rdotsEl=$("#rdots");
+let rContentN=0;
+function setDots(){
+  [...rdotsEl.children].forEach((b,i)=>b.classList.toggle("on",i===rIdx));
+}
+function openReader(key){
+  const r=READERS[key]; if(!r){ toast("Reader coming"); return; }
+  $("#l3title").textContent="Your Pattern";
+  rContentN=r.slides.length;
+  let html=r.slides.map((t,i)=>'<div class="rslide"><div class="reyebrow">'+r.eyebrow+'</div>'+(i===0?'<h2>'+r.title+'</h2>':'')+'<p>'+t+'</p></div>').join("");
+  const hasNextMoon=nextInsightIdx(focusIdx)>-1;
+  html+='<div class="rslide end"><div class="done">That is the insight</div><h2>Where to next?</h2>'+
+    '<button class="pcta" data-end="moon">'+(hasNextMoon?"Next Moon Insight":"Back to your Moon")+' <span class="arw">&#8595;</span></button>'+
+    '<button class="pcta ghost" data-end="venus">Move On to Venus <span class="arw">&#8594;</span></button></div>';
+  rw.innerHTML=html;
+  rdotsEl.innerHTML=Array.from({length:rContentN+1},()=>'<b></b>').join("");
+  rw.querySelectorAll("[data-end]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); closeReaderThen(b.dataset.end); }));
+  rslides=[...rw.querySelectorAll(".rslide")]; rIdx=0; rw.scrollLeft=0; setDots();
+  const l3=$("#l3"); l3.classList.remove("hidden"); requestAnimationFrame(()=>l3.classList.add("show"));
+}
+function rGo(i){ rIdx=Math.max(0,Math.min(rslides.length-1,i)); rw.scrollTo({left:rIdx*rw.clientWidth,behavior:"smooth"}); setDots(); }
+function rAdvance(dir){ rGo(rIdx+dir); }
+let rScrollT=null;
+rw.addEventListener("scroll",()=>{ clearTimeout(rScrollT); rScrollT=setTimeout(()=>{ if(rw.clientWidth){ rIdx=Math.round(rw.scrollLeft/rw.clientWidth); setDots(); } },90); },{passive:true});
+rw.addEventListener("click",e=>{ if(e.target.closest("button")) return; const b=rw.getBoundingClientRect(); rAdvance((e.clientX-b.left) > b.width*0.32 ? 1 : -1); });
+document.addEventListener("keydown",e=>{ if(!$("#l3").classList.contains("show")) return; if(e.key==="ArrowRight") rAdvance(1); else if(e.key==="ArrowLeft") rAdvance(-1); });
+function hideL3(){ const l3=$("#l3"); l3.classList.remove("show"); setTimeout(()=>l3.classList.add("hidden"),340); }
+function nextInsightIdx(from){ for(let i=from+1;i<CARDS.length;i++) if(CARDS[i].type==="insight") return i; return -1; }
+function landOn(i){ focusIdx=Math.max(0,Math.min(CARDS.length-1,i)); if(mode==="scroll") scrollToCard(focusIdx); else goTo(focusIdx); }
+function closeReader(){ hideL3(); setTimeout(serveNext,420); }              /* back: dismiss, surface next card */
+function closeReaderThen(kind){
+  hideL3();
+  const nm=nextInsightIdx(focusIdx);
+  const target = kind==="venus" ? CARDS.length-1 : (nm>-1 ? nm : 0);
+  setTimeout(()=>{ landOn(target); if(kind==="venus") toast("Would open your Venus"); },420);
+}
+$("#l3back").addEventListener("click",closeReader);
+
+/* nav */
+function enterL2(){ $("#l1").classList.add("hidden"); $("#l2").classList.remove("hidden"); buildStrip(); buildFeed(); }
+function exitToL1(){ $("#l2").classList.add("hidden"); $("#l1").classList.remove("hidden"); }
+$("#beginBtn").addEventListener("click",enterL2);
+$("#l2back").addEventListener("click",exitToL1);
+
+/* toast */
+let toastEl=null,toastT=null;
+function toast(m){ if(!toastEl){ toastEl=document.createElement("div"); toastEl.style.cssText="position:absolute;left:50%;bottom:88px;transform:translate(-50%,10px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:13px;z-index:60;opacity:0;transition:all .25s;white-space:nowrap;pointer-events:none;"; screenEl.appendChild(toastEl);} toastEl.textContent=m; requestAnimationFrame(()=>{toastEl.style.opacity="1";toastEl.style.transform="translate(-50%,0)";}); clearTimeout(toastT); toastT=setTimeout(()=>{toastEl.style.opacity="0";toastEl.style.transform="translate(-50%,10px)";},1500); }
+
+drawL1();
+window.addEventListener("resize",()=>{ if(!$("#l1").classList.contains("hidden")) drawL1(); if(!$("#l2").classList.contains("hidden")){ measure(); feed.querySelectorAll(".pcard").forEach(el=>el.style.height=cardH+"px"); goTo(focusIdx,true); } });
+</script>
+</body>
+</html>

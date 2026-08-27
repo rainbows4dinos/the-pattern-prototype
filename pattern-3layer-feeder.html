@@ -64,7 +64,7 @@
   .peyebrow{font-size:12px;letter-spacing:.06em;color:var(--mut);margin-bottom:6px;}
   .ptitle{font-family:var(--serif);font-weight:400;font-size:29px;line-height:1.12;letter-spacing:-.01em;margin:0 0 12px;padding-right:52px;}
   .pbody{font-size:16px;line-height:1.55;color:var(--body);margin:0;padding-right:52px;}
-  .pcard .foot{margin-top:auto;padding-top:18px;}
+  .pcard .foot{padding-top:40px;}
   .pcta{display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:13px 22px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;}
   .pcta.ghost{background:none;color:var(--ink);border:1px solid var(--line);}
   .pcta .arw{font-size:15px;}
@@ -87,7 +87,7 @@
 
   .tabbar{position:absolute;left:0;right:0;bottom:0;height:calc(58px + env(safe-area-inset-bottom,0px));
     display:flex;align-items:center;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);}
-  .tabbar .pillbar{display:flex;gap:22px;background:var(--ink);border-radius:999px;padding:12px 20px;}
+  .tabbar .pillbar{display:flex;gap:22px;background:var(--ink);border-radius:999px;padding:12px 20px;box-shadow:0 6px 20px rgba(42,35,32,.22);}
   .tabbar .ti{width:22px;height:22px;color:var(--bg);opacity:.8;display:flex;align-items:center;justify-content:center;font-size:16px;}
   .tabbar .ti.me{width:30px;height:30px;border-radius:50%;background:var(--bg);opacity:1;margin:-4px 0;}
 
@@ -107,9 +107,9 @@
   /* LAYER 3 */
   #l3{z-index:40;background:var(--bg);transform:scale(1.04);opacity:0;transition:opacity .32s ease,transform .34s cubic-bezier(.34,1,.4,1);pointer-events:none;}
   #l3.show{opacity:1;transform:scale(1);pointer-events:auto;}
-  #rtrackWrap{position:absolute;left:0;right:0;top:112px;bottom:150px;overflow:hidden;}
-  #rtrack{display:flex;height:100%;transition:transform .34s cubic-bezier(.4,0,.2,1);}
-  .rslide{height:100%;padding:14px 26px;display:flex;flex-direction:column;overflow-y:auto;}
+  #rtrackWrap{position:absolute;left:0;right:0;top:112px;bottom:96px;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scrollbar-width:none;}
+  #rtrackWrap::-webkit-scrollbar{display:none;}
+  .rslide{flex:0 0 100%;scroll-snap-align:start;height:100%;padding:14px 30px;display:flex;flex-direction:column;justify-content:center;}
   .rslide .reyebrow{font-size:12px;letter-spacing:.06em;color:var(--mut);margin-bottom:14px;}
   .rslide h2{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;margin:0 0 22px;}
   .rslide p{font-size:19px;line-height:1.6;color:var(--ink);margin:0;}
@@ -117,16 +117,15 @@
   .pcard.locked .phero{background:linear-gradient(135deg,#e9e2d4,#dcd2c0);opacity:.85;}
   .pcard.locked .ptitle,.pcard.locked .pbody{opacity:.7;}
   .lockmark{position:absolute;top:16px;right:16px;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;}
-  #rdots{position:absolute;left:0;right:0;bottom:96px;display:flex;gap:8px;justify-content:center;}
-  #rdots b{width:8px;height:8px;border-radius:50%;background:var(--line);display:block;transition:width .3s,background .3s;}
+  #rdots{position:absolute;left:0;right:0;bottom:80px;z-index:3;display:flex;gap:7px;justify-content:center;pointer-events:none;}
+  #rdots b{width:8px;height:8px;border-radius:50%;background:var(--line);display:block;}
   #rdots b.on{background:var(--ink);width:22px;border-radius:4px;}
   .rslide.end{align-items:center;justify-content:center;text-align:center;gap:12px;}
   .rslide.end .done{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;}
   .rslide.end h2{margin-bottom:20px;}
   .rslide.end .pcta{width:min(320px,86%);justify-content:center;}
-  #fabs3{position:absolute;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px) + 10px);z-index:9;display:flex;flex-direction:column;gap:9px;}
 
-  @media (prefers-reduced-motion:reduce){#feed,#rtrack,.pcard,#l3{transition:none!important;}}
+  @media (prefers-reduced-motion:reduce){#feed,.pcard,#l3{transition:none!important;} #rtrackWrap{scroll-behavior:auto;}}
 </style>
 </head>
 <body>
@@ -153,11 +152,7 @@
     <div id="feedZone"><div id="feed"></div></div>
     <div id="nextpill"><span class="nx">Next</span><span class="nt"></span><span class="ar">&#8595;</span></div>
     <div id="fabs">
-      <button class="fab" title="Ask">&#128172;</button>
-      <button class="fab" title="Shares">&#9737;</button>
-      <button class="fab" title="Save">&#9734;</button>
-      <button class="fab" title="Share">&#8593;</button>
-      <button class="fab" id="listFab" title="Insights">&#9776;</button>
+      <button class="fab" id="listFab" title="Chapters">&#9776;</button>
     </div>
     <div class="tabbar"><div class="pillbar"><span class="ti">&#9737;</span><span class="ti">&#9789;</span><span class="ti me"></span><span class="ti">&#9775;</span><span class="ti">&#9906;</span></div></div>
     <div id="sheetScrim"></div>
@@ -168,9 +163,8 @@
   <div class="layer hidden" id="l3">
     <div class="statusbar"></div>
     <div class="toolbar"><button class="round" id="l3back">&#8249;</button><span class="tbtitle" id="l3title">Reader</span><span class="tbspacer"></span></div>
-    <div id="rtrackWrap"><div id="rtrack"></div></div>
+    <div id="rtrackWrap"></div>
     <div id="rdots"></div>
-    <div id="fabs3"><button class="fab">&#128172;</button><button class="fab">&#9737;</button><button class="fab">&#9734;</button><button class="fab">&#8593;</button></div>
     <div class="tabbar"><div class="pillbar"><span class="ti">&#9737;</span><span class="ti">&#9789;</span><span class="ti me"></span><span class="ti">&#9775;</span><span class="ti">&#9906;</span></div></div>
   </div>
 
@@ -329,8 +323,8 @@ function cardHTML(c,i){
 function measure(){
   const H=screenEl.clientHeight;
   const headerH=$("#l2 .statusbar").offsetHeight+$("#l2 .toolbar").offsetHeight+$("#strip").offsetHeight;
-  const tabbarH=58, peek=92;
-  const zoneH=H-headerH-tabbarH;
+  const peek=32;
+  const zoneH=H-headerH;
   cardH=Math.max(300,zoneH-peek);
   feedZone.style.top=headerH+"px"; feedZone.style.height=zoneH+"px";
 }
@@ -399,29 +393,33 @@ scrim.addEventListener("click",closeSheet);
 function scrollToCard(i){ const el=feed.querySelectorAll(".pcard")[i]; if(el) feedZone.scrollTo({top:el.offsetTop-8,behavior:"smooth"}); }
 
 /* reader */
-let rslides=[], rIdx=0, rSwipe=false;
+let rslides=[], rIdx=0;
+const rw=$("#rtrackWrap"), rdotsEl=$("#rdots");
+let rContentN=0;
+function setDots(){
+  [...rdotsEl.children].forEach((b,i)=>b.classList.toggle("on",i===rIdx));
+}
 function openReader(key){
   const r=READERS[key]; if(!r){ toast("Reader coming"); return; }
   $("#l3title").textContent="Your Pattern";
-  const parts=r.slides.map((t,i)=>({cls:"",html:'<div class="reyebrow">'+r.eyebrow+'</div>'+(i===0?'<h2>'+r.title+'</h2>':'')+'<p>'+t+'</p>'}));
+  rContentN=r.slides.length;
+  let html=r.slides.map((t,i)=>'<div class="rslide"><div class="reyebrow">'+r.eyebrow+'</div>'+(i===0?'<h2>'+r.title+'</h2>':'')+'<p>'+t+'</p></div>').join("");
   const hasNextMoon=nextInsightIdx(focusIdx)>-1;
-  parts.push({cls:"end",html:'<div class="done">That is the insight</div><h2>Where to next?</h2>'+
+  html+='<div class="rslide end"><div class="done">That is the insight</div><h2>Where to next?</h2>'+
     '<button class="pcta" data-end="moon">'+(hasNextMoon?"Next Moon Insight":"Back to your Moon")+' <span class="arw">&#8595;</span></button>'+
-    '<button class="pcta ghost" data-end="venus">Move On to Venus <span class="arw">&#8594;</span></button>'});
-  const n=parts.length, tr=$("#rtrack");
-  tr.style.width=(n*100)+"%";
-  tr.innerHTML=parts.map(p=>'<div class="rslide '+p.cls+'" style="width:'+(100/n)+'%">'+p.html+'</div>').join("");
-  tr.querySelectorAll("[data-end]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); closeReaderThen(b.dataset.end); }));
-  rslides=[...tr.querySelectorAll(".rslide")]; rIdx=0; drawDots(); moveReader(true);
+    '<button class="pcta ghost" data-end="venus">Move On to Venus <span class="arw">&#8594;</span></button></div>';
+  rw.innerHTML=html;
+  rdotsEl.innerHTML=Array.from({length:rContentN+1},()=>'<b></b>').join("");
+  rw.querySelectorAll("[data-end]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); closeReaderThen(b.dataset.end); }));
+  rslides=[...rw.querySelectorAll(".rslide")]; rIdx=0; rw.scrollLeft=0; setDots();
   const l3=$("#l3"); l3.classList.remove("hidden"); requestAnimationFrame(()=>l3.classList.add("show"));
 }
-function drawDots(){ $("#rdots").innerHTML=rslides.map((_,i)=>'<b class="'+(i===rIdx?'on':'')+'"></b>').join(""); }
-function moveReader(instant){ const tr=$("#rtrack"), n=rslides.length; if(instant) tr.style.transition="none"; tr.style.transform="translateX("+(-rIdx*(100/n))+"%)"; if(instant) requestAnimationFrame(()=>tr.style.transition=""); drawDots(); }
-function rAdvance(dir){ const t=rIdx+dir; if(t<0||t>rslides.length-1) return; rIdx=t; moveReader(); }
-const rw=$("#rtrackWrap");
-rw.addEventListener("touchstart",e=>{ rw._x=e.touches[0].clientX; },{passive:true});
-rw.addEventListener("touchend",e=>{ if(rw._x==null)return; const dx=e.changedTouches[0].clientX-rw._x; rw._x=null; if(Math.abs(dx)>44){ rSwipe=true; rAdvance(dx<0?1:-1);} },{passive:true});
-rw.addEventListener("click",e=>{ if(rSwipe){ rSwipe=false; return; } const b=rw.getBoundingClientRect(); rAdvance((e.clientX-b.left)>b.width/2?1:-1); });
+function rGo(i){ rIdx=Math.max(0,Math.min(rslides.length-1,i)); rw.scrollTo({left:rIdx*rw.clientWidth,behavior:"smooth"}); setDots(); }
+function rAdvance(dir){ rGo(rIdx+dir); }
+let rScrollT=null;
+rw.addEventListener("scroll",()=>{ clearTimeout(rScrollT); rScrollT=setTimeout(()=>{ if(rw.clientWidth){ rIdx=Math.round(rw.scrollLeft/rw.clientWidth); setDots(); } },90); },{passive:true});
+rw.addEventListener("click",e=>{ if(e.target.closest("button")) return; const b=rw.getBoundingClientRect(); rAdvance((e.clientX-b.left) > b.width*0.32 ? 1 : -1); });
+document.addEventListener("keydown",e=>{ if(!$("#l3").classList.contains("show")) return; if(e.key==="ArrowRight") rAdvance(1); else if(e.key==="ArrowLeft") rAdvance(-1); });
 function hideL3(){ const l3=$("#l3"); l3.classList.remove("show"); setTimeout(()=>l3.classList.add("hidden"),340); }
 function nextInsightIdx(from){ for(let i=from+1;i<CARDS.length;i++) if(CARDS[i].type==="insight") return i; return -1; }
 function landOn(i){ focusIdx=Math.max(0,Math.min(CARDS.length-1,i)); if(mode==="scroll") scrollToCard(focusIdx); else goTo(focusIdx); }
