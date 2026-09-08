@@ -32,7 +32,7 @@
   .hidden{display:none;}
 
   .statusbar{height:calc(env(safe-area-inset-top,0px) + 14px);}
-  .toolbar{display:flex;align-items:center;gap:10px;padding:6px 16px 8px;}
+  .toolbar{display:flex;align-items:center;gap:10px;padding:0 16px 8px;}
   .round{width:44px;height:44px;border-radius:50%;border:none;background:var(--default);
     display:flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer;padding:0;font-size:17px;flex:0 0 auto;}
   .round svg{width:20px;height:20px;}
@@ -40,7 +40,7 @@
   .tbspacer{flex:1;}
 
   /* LAYER 1 */
-  #l1 .l1top{display:flex;align-items:center;padding:6px 20px 8px;}
+  #l1 .l1top{display:flex;align-items:center;padding:0 20px 8px;}
   #l1 .l1title{font-family:var(--heading);font-weight:700;font-size:26px;color:var(--ink);}
   #l1search{width:48px;height:48px;background:var(--default);border:none;}
   #l1search svg{width:22px;height:22px;}
@@ -110,7 +110,7 @@
   .ctag.lock{background:var(--ink);color:var(--bg);border-color:var(--ink);}
   .cring svg{width:26px;height:26px;display:block;}
   .peyebrow{font-size:14px;letter-spacing:.01em;color:var(--mut);margin-bottom:8px;}
-  .ptitle{font-family:var(--heading);font-weight:700;font-size:32px;line-height:1.05;letter-spacing:-.02em;margin:0 0 16px;}
+  .ptitle{font-family:var(--heading);font-weight:700;font-size:26px;line-height:1.1;letter-spacing:-.02em;margin:0 0 14px;}
   .pbody{font-size:16.5px;line-height:1.52;color:var(--body);margin:0;}
   .pmore{color:var(--mut);font-size:17px;line-height:1;margin-top:14px;letter-spacing:2px;}
   .pcard .foot{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:20px;padding-top:24px;}
@@ -296,6 +296,8 @@
 <script>
 "use strict";
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+// force text (not emoji) presentation for astrological glyphs so ♀/♂ etc. don't sit low on mobile
+const G=s=>String(s).replace(/[\u2609\u263D\u263F\u2640-\u2653\u260A-\u260C\u25A1]/g,m=>m+'\uFE0E');
 const screenEl=$("#screen");
 
 const NODES=[
@@ -389,7 +391,7 @@ let NC=0;
 let chipA=0, chipCent=[], chipW=[], chipS=0, chipBusy=false, chipMoved=false, chipEls=[];
 function buildChips(){
   NC=PLACEMENTS.length;
-  chiptrack.innerHTML=PLACEMENTS.map((p,i)=>'<button class="chip'+(i===chipA?' on':'')+'" data-c="'+i+'"><span class="cgl">'+p.g.split(" ")[0]+'</span><span class="clbl">'+p.mean+'</span></button>').join("");
+  chiptrack.innerHTML=PLACEMENTS.map((p,i)=>'<button class="chip'+(i===chipA?' on':'')+'" data-c="'+i+'"><span class="cgl">'+G(p.g.split(" ")[0])+'</span><span class="clbl">'+p.mean+'</span></button>').join("");
   chipEls=[...chiptrack.querySelectorAll(".chip")];
   chipEls.forEach((el,i)=>el.addEventListener("click",()=>{ if(chipMoved) return; const d=chipDelta(i); if(d) chipGo(d); }));
   measureChips();
@@ -465,7 +467,7 @@ function cardHTML(c,i){
         '<button class="pcta soft" data-back="1">Back to Your Pattern</button></div></div>';
   }
   const audio=c.mode==="audio", isLocked=c.type==="locked";
-  const glyphs = c.glyphs ? '<span class="cglyphs">'+c.glyphs+'</span>' : '<span class="cglyphs-empty"></span>';
+  const glyphs = c.glyphs ? '<span class="cglyphs">'+G(c.glyphs)+'</span>' : '<span class="cglyphs-empty"></span>';
   const tag = isLocked
     ? '<span class="ctag lock">Premium</span>'
     : '<span class="ctagwrap"><span class="ctag">'+(audio?IC_AUDIO:IC_READ)+'<span>'+(audio?"Audio":"Reading")+'</span></span><span class="cring">'+IC_RING+'</span></span>';
@@ -485,10 +487,11 @@ function cardHTML(c,i){
 }
 function measure(){
   const H=screenEl.clientHeight;
+  const small=H<720;                               // phone viewport shrunk by browser chrome
+  const tabbarH=small?70:80, topGap=small?16:36, peek=small?40:58;
   const headerH=$("#l2 .statusbar").offsetHeight+$("#l2 .toolbar").offsetHeight+$("#chipwrap").offsetHeight;
-  const tabbarH=80, topGap=36;   // space above the card so the up chevron has room
   const zoneH=H-headerH-topGap-tabbarH;
-  cardH=Math.max(300,zoneH-58);   // reserve room below for the deck peek
+  cardH=Math.max(280,zoneH-peek);   // reserve room below for the deck peek
   feedZone.style.top=(headerH+topGap)+"px"; feedZone.style.height=zoneH+"px";
   const au=$("#arrUp"); if(au) au.style.top=(headerH+2)+"px";
 }
@@ -633,7 +636,7 @@ function openReader(c){
   const r=READERS[key]; if(!r){ toast("Reader coming"); return; }
   const glyphs=(c&&c.glyphs)||"";
   rContentN=r.slides.length;
-  $("#rhead").innerHTML=(glyphs?'<span class="rglyph">'+glyphs+'</span>':'')+'<div class="reyebrow">'+r.eyebrow+'</div><h2>'+r.title+'</h2>';
+  $("#rhead").innerHTML=(glyphs?'<span class="rglyph">'+G(glyphs)+'</span>':'')+'<div class="reyebrow">'+r.eyebrow+'</div><h2>'+r.title+'</h2>';
   let html=r.slides.map(t=>'<div class="rslide"><p>'+t+'</p></div>').join("");
   const cur=PLACEMENTS[chipA].place.split(" in ")[0];
   const nm=nextInsightIdx(focusIdx);
@@ -731,7 +734,7 @@ const PLACEMENTS=[
 const carwrap=$("#carwrap"), cartrack=$("#cartrack"), NP=PLACEMENTS.length;
 let center=0, carCW=0, carGAP=20, carBusy=false, carMoved=false, carCards=[];
 function carCard(p){
-  return '<div class="pcard2"><span class="cg">'+p.g+'</span>'+
+  return '<div class="pcard2"><span class="cg">'+G(p.g)+'</span>'+
     '<div class="cplace">'+p.place+'</div><div class="cmean">'+p.mean+'</div>'+
     '<div class="cnext"><span class="col"><div class="lbl">Next Up:</div><div class="nm">'+p.next+'</div></span><span class="chev">&#8250;</span></div></div>';
 }
@@ -747,7 +750,11 @@ function measureCar(){
 function buildCarousel(){
   cartrack.innerHTML=PLACEMENTS.map(carCard).join("");
   carCards=[...cartrack.querySelectorAll(".pcard2")];
-  carCards.forEach((el,i)=>el.addEventListener("click",()=>{ if(!carMoved) enterL2(i); }));
+  carCards.forEach((el,i)=>el.addEventListener("click",()=>{
+    if(carMoved) return;
+    const off=wrapOff(i-center);          // click a peeking card to bring it in; click the centered card to enter
+    if(off===0) enterL2(i); else carGo(off>0?1:-1);
+  }));
   center=0; measureCar();
 }
 function carGo(dir){
