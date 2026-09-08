@@ -33,7 +33,7 @@
 
   .statusbar{height:calc(env(safe-area-inset-top,0px) + 14px);}
   .toolbar{display:flex;align-items:center;gap:10px;padding:0 16px 8px;}
-  .round{width:44px;height:44px;border-radius:50%;border:none;background:var(--default);
+  .round{width:36px;height:36px;border-radius:50%;border:none;background:var(--default);
     display:flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer;padding:0;font-size:17px;flex:0 0 auto;}
   .round svg{width:20px;height:20px;}
   .tbtitle{font-weight:600;font-size:16px;white-space:nowrap;}
@@ -42,12 +42,12 @@
   /* LAYER 1 */
   #l1 .l1top{display:flex;align-items:center;padding:0 20px 8px;}
   #l1 .l1title{font-family:var(--heading);font-weight:700;font-size:26px;color:var(--ink);}
-  #l1search{width:48px;height:48px;background:var(--default);border:none;}
+  #l1search{width:36px;height:36px;background:var(--default);border:none;}
   #l1search svg{width:22px;height:22px;}
-  #l1 .l1avatar{width:48px;height:48px;position:relative;border:none;background:none;padding:0;cursor:pointer;margin-left:12px;flex:0 0 auto;}
-  #l1 .l1avatar .pic{width:48px;height:48px;border-radius:50%;overflow:hidden;background:linear-gradient(140deg,#ece3d2,#cdbd9f);display:flex;align-items:flex-end;justify-content:center;}
-  #l1 .l1avatar .pers{width:40px;height:40px;color:#a6987e;}
-  #l1 .l1avatar .dot{position:absolute;right:0;bottom:2px;width:12px;height:12px;border-radius:50%;background:var(--danger);border:2px solid var(--card);}
+  #l1 .l1avatar{width:36px;height:36px;position:relative;border:none;background:none;padding:0;cursor:pointer;margin-left:10px;flex:0 0 auto;}
+  #l1 .l1avatar .pic{width:36px;height:36px;border-radius:50%;overflow:hidden;background:linear-gradient(140deg,#ece3d2,#cdbd9f);display:flex;align-items:flex-end;justify-content:center;}
+  #l1 .l1avatar .pers{width:30px;height:30px;color:#a6987e;}
+  #l1 .l1avatar .dot{position:absolute;right:-1px;bottom:1px;width:10px;height:10px;border-radius:50%;background:var(--danger);border:2px solid var(--card);}
   #l1 .l1sec{text-align:center;padding:16px 24px 18px;}
   #l1 .l1h{font-family:var(--heading);font-weight:700;font-size:28px;color:var(--ink);margin:0 0 6px;}
   #l1 .l1sub{font-size:15px;color:var(--mut);}
@@ -206,7 +206,7 @@
   @media (prefers-reduced-motion:reduce){#feed,.pcard,#l3{transition:none!important;} #rtrackWrap{scroll-behavior:auto;}}
 
 
-  #aifab{position:absolute;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:50;width:56px;height:56px;border-radius:50%;
+  #aifab{position:absolute;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:50;width:36px;height:36px;border-radius:50%;
     background:var(--accent);color:#FCFCFC;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
     box-shadow:0 8px 22px rgba(38,32,0,.34);transition:transform .22s cubic-bezier(.2,.8,.25,1),opacity .18s;}
   #aifab svg{width:26px;height:26px;}
@@ -657,7 +657,7 @@ function openReader(c){
   $("#rhead").style.top=tb+"px";
   rw.style.top=(tb+$("#rhead").offsetHeight+10)+"px";                      // track starts just below the sticky header
   setDots();
-  requestAnimationFrame(()=>l3.classList.add("show"));
+  requestAnimationFrame(()=>{ l3.classList.add("show"); requestAnimationFrame(setDots); });   // recompute once laid out, so page 1 renders right
 }
 function rGo(i){ rIdx=Math.max(0,Math.min(rslides.length-1,i)); rw.scrollTo({left:rIdx*rw.clientWidth,behavior:"smooth"}); setDots(); }
 function rAdvance(dir){ rGo(rIdx+dir); }
@@ -703,6 +703,8 @@ $("#l1search").addEventListener("click",()=>toast("Search coming soon"));
 $("#l1av").addEventListener("click",()=>toast("Opens account menu"));
 $("#rsearch").addEventListener("click",()=>toast("Search coming soon"));
 $("#rchapters").addEventListener("click",()=>toast("Chapters coming soon"));
+const TAB_MSG={ "Lens":"Opens Lens section, a daily feed of content", "Friends":"Opens the Friends section", "Bonds":"Opens the Bonds section", "Discover":"Opens 'Discover' smart search" };
+$$(".tab").forEach(b=>b.addEventListener("click",()=>{ const m=TAB_MSG[(b.lastElementChild.textContent||"").trim()]; if(m) toast(m); }));
 
 /* toast */
 let toastEl=null,toastT=null;
