@@ -101,16 +101,12 @@
         color: var(--muted);
         font-size: 0.75rem;
       }
-      section { margin-bottom: 2rem; }
       h2 {
         font-size: 1rem;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         font-weight: 590;
-        margin: 0 0 1.5rem 0.125rem;
-        padding-bottom: 0.25rem;
-        width: 100%;
-        border-bottom: 1px solid var(--line);
+        margin: 0;
       }
       h2 .count { text-transform: none; letter-spacing: 0; font-weight: 400; }
 
@@ -119,8 +115,50 @@
         letter-spacing: 0.06em;
         color: var(--muted);
         font-weight: 590;
-        margin: 0 0 1.2rem 0.125rem;
+        margin: 0;
       }
+
+      /*
+        Both heading levels collapse: .section is an <h2> family, .group is an
+        <h3> round nested inside one. Shared summary treatment, then the two
+        sizes differ only in spacing and the section's rule.
+      */
+      details > summary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        list-style: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      details > summary::-webkit-details-marker { display: none; }
+      details > summary::before {
+        content: "";
+        flex: none;
+        width: 0.4rem;
+        height: 0.4rem;
+        border-right: 1.5px solid var(--muted);
+        border-bottom: 1.5px solid var(--muted);
+        transform: rotate(-45deg);
+        transition: transform 0.15s ease;
+      }
+      details[open] > summary::before { transform: rotate(45deg); }
+      details > summary:hover h3 { color: var(--fg); }
+
+      details.section { margin-bottom: 2rem; }
+      details.section > summary {
+        margin: 0 0 1.5rem 0.125rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--line);
+      }
+      /* Closed, the summary's gap has nothing to separate it from. */
+      details.section:not([open]) > summary { margin-bottom: 0; }
+
+      details.group > summary { margin: 0 0 1.2rem 0.125rem; }
+      /* Collapsed groups shouldn't leave the 5rem gap the open grid carries. */
+      details.group:not([open]) { margin-bottom: 1.5rem; }
+      details.group > ul { margin-bottom: 3rem; }
       footer { color: var(--muted); font-size: 0.8125rem; margin-top: 2.5rem; }
       footer a { color: inherit; }
     </style>
@@ -136,300 +174,341 @@
 
         To add a prototype: drop its .html in this folder, give it a "prototype"
         metadata block near the top — copy the one at the end of the <head> in
-        your-journey-interaction-test-002.html, which sets title, blurb, group
-        and order — then run `npm run proto`.
+        spiral-v4-with-node-content-v7.html, which sets title, group, round and
+        order — then run `npm run proto`.
 
-        title falls back to the <title> tag, group falls back to Archive, and a
-        missing order sorts last within its group. Field reference lives in the
-        header comment of build-index.mjs.
+        group is the <h2> section; round is the collapsible <details> subsection
+        inside it. Rounds render newest-first off the leading number in the
+        label, with the newest open; a prototype with no round lands in a bare
+        list under the <h2>. title falls back to the <title> tag, group falls
+        back to Archive, and a missing order sorts last within its round. Field
+        reference lives in the header comment of build-index.mjs.
         Anything outside the markers — this comment, the styles, the thumbnail
         script, the footer — is left alone by the generator.
       -->
       <!-- prototypes:start -->
-      <section>
-        <h2>Your Journey <span class="count">— Interaction Tests</span></h2>
-        <h3>RD5 Explorations: Content Delivery Systems</h3>
-        <ul>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v4.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">⭐️ LATEST: Content Delivery System -- Stacked Cards Approach v4 (vertical)</div>
-                <div class="file">pattern-3layer-stacked-deck-v4.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v3.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Content Delivery System -- Stacked Cards Approach V3 (horizontal)</div>
-                <div class="file">pattern-3layer-stacked-deck-v3.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v2.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Content Delivery System -- Stacked Cards Approach V2</div>
-                <div class="file">pattern-3layer-stacked-deck-v2.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Content Delivery System -- Stacked Cards Approach</div>
-                <div class="file">pattern-3layer-stacked-deck.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-content-delivery-views.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Content Delivery System -- Refined Direction</div>
-                <div class="file">pattern-content-delivery-views.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-3layer-middle.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Content Delivery System - Middle Path, Feeder Refined</div>
-                <div class="file">pattern-3layer-middle.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-3layer-noscroll.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Content Delivery System - No Scroll v2</div>
-                <div class="file">pattern-3layer-noscroll.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/pattern-3layer-feeder.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Content Delivery System - Feeder & Reader v2</div>
-                <div class="file">pattern-3layer-feeder.html</div>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <h3>RD4 Explorations: Refine the Spiral</h3>
-        <ul>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-adjustment-opt2.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Spiral Refinement - Option 2</div>
-                <div class="file">spiral-adjustment-opt2.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-adjustment-opt1.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Spiral Refinement - Option 1</div>
-                <div class="file">spiral-adjustment-opt1.html</div>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <h3>RD3 Explorations: Dive Deeper Into the Spiral</h3>
-        <ul>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v7.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">⭐️ Dive Deeper Into the Spiral - v7 (LATEST)</div>
-                <div class="file">spiral-v4-with-node-content-v7.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v6.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Dive Deeper Into the Spiral - v6</div>
-                <div class="file">spiral-v4-with-node-content-v6.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v5.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Dive Deeper Into the Spiral - v5</div>
-                <div class="file">spiral-v4-with-node-content-v5.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v4.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Dive Deeper Into the Spiral - v4</div>
-                <div class="file">spiral-v4-with-node-content-v4.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v3.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Dive Deeper Into the Spiral - v3</div>
-                <div class="file">spiral-v4-with-node-content-v3.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v2.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Dive Deeper Into the Spiral - v2 (THIS ONE!)</div>
-                <div class="file">spiral-v4-with-node-content-v2.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v1.html">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Dive Deeper Into the Spiral - v1</div>
-                <div class="file">spiral-v4-with-node-content-v1.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/mars-node-v4">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Dive Into Mars - First Pass</div>
-                <div class="file">mars-node-v4.html</div>
-              </div>
-            </a>
-          </li>
-    
-        </ul>
-        <h3>RD2 Explorations: Refining the Spiral Journey</h3>
-        <ul>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-spiral-v4">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">⭐️ Journey Spiral 004</div>
-                <div class="file">your-journey-spiral-v4.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-spiral-v3">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Journey Spiral 003</div>
-                <div class="file">your-journey-spiral-v3.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-spiral-v2">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Journey Spiral 002</div>
-                <div class="file">your-journey-spiral-v2.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-spiral">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Journey Spiral 001</div>
-                <div class="file">your-journey-spiral.html</div>
-              </div>
-            </a>
-          </li>
-        </ul>
+      <details class="section" open>
+        <summary><h2>You Page <span class="count">— User Tests</span></h2></summary>
+        <details class="group" open>
+          <summary><h3>Journey Placements Content Delivery</h3></summary>
+          <ul>
+            <li>
+              <a class="item" href="/static-prototypes/thepattern-content-delivery-test-noarrows">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery Test -- No Arrows</div>
+                  <div class="file">thepattern-content-delivery-test-noarrows.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/thepattern-content-delivery-test-arrows">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery Test -- With Arrows</div>
+                  <div class="file">thepattern-content-delivery-test-arrows.html</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+          </summary>
+        </details>  
 
-        <h3>RD1 Explorations: Finding the Shape</h3>
-        <ul>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-unwind-2">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Full Circle Unwind to Spiral v2</div>
-                <div class="file">your-journey-unwind-2.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-unwind">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Full Circle Unwind to Spiral</div>
-                <div class="file">your-journey-unwind.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-circle">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Full Circle</div>
-                <div class="file">your-journey-circle.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-horizon">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Horizon</div>
-                <div class="file">your-journey-horizon.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-spiral">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">⭐️ Spiral</div>
-                <div class="file">your-journey-spiral.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/your-journey-conveyor">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Conveyor — Second Pass</div>
-                <div class="file">your-journey-conveyor.html</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a class="item" href="/static-prototypes/the-pattern-conveyor-strip-RD1">
-              <div class="thumb"><span class="placeholder">Preview</span></div>
-              <div class="label">
-                <div class="name">Conveyor - First Past</div>
-                <div class="file">the-pattern-conveyor-strip-RD1.html</div>
-              </div>
-            </a>
-          </li>
-        </ul>
-      </section>
 
-      <section>
-        <h2>Archive</h2>
+        </summary>
+      </details>
+      <details class="section" open>
+        <summary><h2>Your Journey <span class="count">— Interaction Tests</span></h2></summary>
+        <details class="group" open>
+          <summary><h3>RD5 Explorations: Content Delivery Systems</h3></summary>
+          <ul>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v4">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">⭐️ LATEST: Content Delivery System -- Stacked Cards Approach v4 (vertical)</div>
+                  <div class="file">pattern-3layer-stacked-deck-v4.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v3">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery System -- Stacked Cards Approach V3 (horizontal)</div>
+                  <div class="file">pattern-3layer-stacked-deck-v3.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v2">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery System -- Stacked Cards Approach V2</div>
+                  <div class="file">pattern-3layer-stacked-deck-v2.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery System -- Stacked Cards Approach</div>
+                  <div class="file">pattern-3layer-stacked-deck.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-content-delivery-views">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery System -- Refined Direction</div>
+                  <div class="file">pattern-content-delivery-views.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-3layer-middle">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery System - Middle Path, Feeder Refined</div>
+                  <div class="file">pattern-3layer-middle.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-3layer-noscroll">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery System - No Scroll v2</div>
+                  <div class="file">pattern-3layer-noscroll.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/pattern-3layer-feeder">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Content Delivery System - Feeder &amp; Reader v2</div>
+                  <div class="file">pattern-3layer-feeder.html</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </details>
+        <details class="group">
+          <summary><h3>RD4 Explorations: Refine the Spiral</h3></summary>
+          <ul>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-adjustment-opt2">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Spiral Refinement - Option 2</div>
+                  <div class="file">spiral-adjustment-opt2.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-adjustment-opt1">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Spiral Refinement - Option 1</div>
+                  <div class="file">spiral-adjustment-opt1.html</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </details>
+        <details class="group">
+          <summary><h3>RD3 Explorations: Dive Deeper Into the Spiral</h3></summary>
+          <ul>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v7">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">⭐️ Dive Deeper Into the Spiral - v7 (LATEST)</div>
+                  <div class="file">spiral-v4-with-node-content-v7.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v6">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Dive Deeper Into the Spiral - v6</div>
+                  <div class="file">spiral-v4-with-node-content-v6.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v5">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Dive Deeper Into the Spiral - v5</div>
+                  <div class="file">spiral-v4-with-node-content-v5.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v4">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Dive Deeper Into the Spiral - v4</div>
+                  <div class="file">spiral-v4-with-node-content-v4.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v3">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Dive Deeper Into the Spiral - v3</div>
+                  <div class="file">spiral-v4-with-node-content-v3.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v2">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Dive Deeper Into the Spiral - v2 (THIS ONE!)</div>
+                  <div class="file">spiral-v4-with-node-content-v2.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v1">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Dive Deeper Into the Spiral - v1</div>
+                  <div class="file">spiral-v4-with-node-content-v1.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/mars-node-v4">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Dive Into Mars - First Pass</div>
+                  <div class="file">mars-node-v4.html</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </details>
+        <details class="group">
+          <summary><h3>RD2 Explorations: Refining the Spiral Journey</h3></summary>
+          <ul>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-spiral-v4">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">⭐️ Journey Spiral 004</div>
+                  <div class="file">your-journey-spiral-v4.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-spiral-v3">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Journey Spiral 003</div>
+                  <div class="file">your-journey-spiral-v3.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-spiral-v2">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Journey Spiral 002</div>
+                  <div class="file">your-journey-spiral-v2.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-spiral">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Journey Spiral 001</div>
+                  <div class="file">your-journey-spiral.html</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </details>
+        <details class="group">
+          <summary><h3>RD1 Explorations: Finding the Shape</h3></summary>
+          <ul>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-unwind-2">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Full Circle Unwind to Spiral v2</div>
+                  <div class="file">your-journey-unwind-2.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-unwind">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Full Circle Unwind to Spiral</div>
+                  <div class="file">your-journey-unwind.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-circle">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Full Circle</div>
+                  <div class="file">your-journey-circle.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-horizon">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Horizon</div>
+                  <div class="file">your-journey-horizon.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-spiral">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">⭐️ Spiral</div>
+                  <div class="file">your-journey-spiral.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/your-journey-conveyor">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Conveyor — Second Pass</div>
+                  <div class="file">your-journey-conveyor.html</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="item" href="/static-prototypes/the-pattern-conveyor-strip-RD1">
+                <div class="thumb"><span class="placeholder">Preview</span></div>
+                <div class="label">
+                  <div class="name">Conveyor - First Past</div>
+                  <div class="file">the-pattern-conveyor-strip-RD1.html</div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </details>
+      </details>
+
+      <details class="section" open>
+        <summary><h2>Archive</h2></summary>
         <ul>
           <li>
             <a class="item" href="/static-prototypes/the-pattern-3d-chart">
@@ -440,9 +519,8 @@
               </div>
             </a>
           </li>
-
         </ul>
-      </section>
+      </details>
       <!-- prototypes:end -->
       <footer>&larr; <a href="/">Back to the React prototype</a></footer>
     </main>
@@ -486,6 +564,34 @@
         thumbs.forEach(setScale);
         window.addEventListener("resize", function () {
           thumbs.forEach(setScale);
+        });
+
+        /*
+          Sections and rounds both collapse, so a thumb can be measured at zero
+          size (or never measured at all, since a closed <details> never
+          intersects). Rescale on open, and remember each panel's state — this
+          index gets revisited constantly and re-collapsing the finished rounds
+          by hand every time would be tedious.
+        */
+        var STORE = "static-prototypes:open";
+        var open;
+        try {
+          open = JSON.parse(localStorage.getItem(STORE)) || {};
+        } catch (e) {
+          open = {};
+        }
+
+        var panels = document.querySelectorAll("details.section, details.group");
+        Array.prototype.forEach.call(panels, function (d) {
+          var key = (d.querySelector("summary") || {}).textContent || "";
+          if (key in open) d.open = open[key];
+          d.addEventListener("toggle", function () {
+            Array.prototype.forEach.call(d.querySelectorAll(".thumb"), setScale);
+            open[key] = d.open;
+            try {
+              localStorage.setItem(STORE, JSON.stringify(open));
+            } catch (e) {}
+          });
         });
 
         if (!("IntersectionObserver" in window)) {
