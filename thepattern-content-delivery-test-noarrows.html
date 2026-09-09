@@ -157,9 +157,9 @@
   .tabbar .tab .tabav{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#d9cfbd,#bfae94);border:1px solid var(--line);}
   .tabbar .tab.on{background:var(--lift);color:var(--gold);box-shadow:0 2px 8px rgba(42,35,32,.12);}
 
-  #sheetScrim{position:absolute;inset:0;background:rgba(42,35,32,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:30;}
+  #sheetScrim{position:absolute;inset:0;background:rgba(42,35,32,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:60;}
   #sheetScrim.open{opacity:1;pointer-events:auto;}
-  #sheet{position:absolute;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:22px 22px 0 0;
+  #sheet{position:absolute;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-radius:22px 22px 0 0;
     transform:translateY(101%);transition:transform .3s cubic-bezier(.34,1.06,.4,1);padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px));max-height:70%;overflow:auto;}
   #sheet.open{transform:translateY(0);}
   #sheet .grab{width:36px;height:4px;border-radius:4px;background:var(--line);margin:4px auto 12px;}
@@ -262,8 +262,6 @@
     </div>
     <button class="deckarrow up" id="arrUp" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg></button>
     <div class="tabbar"><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/></svg></span><span>Lens</span></button><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.6 19c0-3 2.5-5.2 5.4-5.2S14.4 16 14.4 19"/><circle cx="16.6" cy="7.6" r="2.4"/><path d="M15.6 13.3c2.3.1 4 2 4 4.2"/></svg></span><span>Friends</span></button><button class="tab on"><span class="tabav"></span><span>You</span></button><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9.4" cy="12" r="5.4"/><circle cx="14.6" cy="12" r="5.4"/></svg></span><span>Bonds</span></button><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="11" r="6.2"/><path d="M15 15.5l4.6 4.6"/><path d="M18.4 3.4l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span><span>Discover</span></button></div>
-    <div id="sheetScrim"></div>
-    <div id="sheet"><div class="grab"></div><h3>Your Gemini Moon &middot; the reading</h3><div id="sheetList"></div></div>
   </div>
 
     <button id="aifab" aria-label="Ask The Pattern"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4L13.65 10.35 20.6 12 13.65 13.65 12 20.6 10.35 13.65 3.4 12 10.35 10.35Z"/><path d="M18.1 4.4Q18.1 6.7 20.4 6.7Q18.1 6.7 18.1 9Q18.1 6.7 15.8 6.7Q18.1 6.7 18.1 4.4Z"/></svg></button>
@@ -277,6 +275,9 @@
       </div>
       <div class="aiinput"><input placeholder="Ask anything about your Pattern…"><button class="aisend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div>
     </div>
+
+  <div id="sheetScrim"></div>
+  <div id="sheet"><div class="grab"></div><h3>Your Gemini Moon &middot; the reading</h3><div id="sheetList"></div></div>
 
   <!-- LAYER 3 -->
   <div class="layer hidden" id="l3">
@@ -600,12 +601,13 @@ document.addEventListener("keydown",e=>{
 
 /* insights sheet */
 const sheet=$("#sheet"), scrim=$("#sheetScrim");
-$("#chaptersBtn").addEventListener("click",()=>{
+function openSheet(){
   $("#sheetList").innerHTML=CARDS.map((c,i)=>{ const meta=c.type==="tout"?"Bond":c.type==="locked"?"Premium":c.type==="continue"?"Next":c.glyphs?"Transit":"Insight";
     return '<div class="sitem'+(i===focusIdx?' on':'')+'" data-j="'+i+'"><span class="n">'+(i+1)+'</span><span class="t">'+c.title+'<small>'+meta+'</small></span></div>'; }).join("");
-  $("#sheetList").querySelectorAll("[data-j]").forEach(el=>el.addEventListener("click",()=>{ closeSheet(); goTo(+el.dataset.j); }));
+  $("#sheetList").querySelectorAll("[data-j]").forEach(el=>el.addEventListener("click",()=>{ closeSheet(); if(!$("#l3").classList.contains("hidden")) hideL3(); goTo(+el.dataset.j); }));
   scrim.classList.add("open"); sheet.classList.add("open");
-});
+}
+$("#chaptersBtn").addEventListener("click",openSheet);
 function closeSheet(){ scrim.classList.remove("open"); sheet.classList.remove("open"); }
 scrim.addEventListener("click",closeSheet);
 
@@ -704,7 +706,7 @@ $("#searchBtn").addEventListener("click",()=>toast("Search coming soon"));
 $("#l1search").addEventListener("click",()=>toast("Search coming soon"));
 $("#l1av").addEventListener("click",()=>toast("Opens account menu"));
 $("#rsearch").addEventListener("click",()=>toast("Search coming soon"));
-$("#rchapters").addEventListener("click",()=>toast("Chapters coming soon"));
+$("#rchapters").addEventListener("click",openSheet);
 const TAB_MSG={ "Lens":"Opens Lens section, a daily feed of content", "Friends":"Opens the Friends section", "Bonds":"Opens the Bonds section", "Discover":"Opens 'Discover' smart search" };
 $$(".tab").forEach(b=>b.addEventListener("click",()=>{ const m=TAB_MSG[(b.lastElementChild.textContent||"").trim()]; if(m) toast(m); }));
 

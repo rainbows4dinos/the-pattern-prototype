@@ -135,6 +135,14 @@
   .touthero .nm{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;background:var(--ink);color:var(--bg);border-radius:999px;padding:3px 9px;white-space:nowrap;}
   .touthero .nm.alt{background:var(--card);color:var(--ink);border:1px solid var(--line);}
 
+  .deckarrow{position:absolute;left:50%;transform:translateX(-50%);z-index:70;width:50px;height:32px;
+    display:flex;align-items:center;justify-content:center;background:none;border:none;
+    color:var(--ink);opacity:.38;cursor:pointer;transition:opacity .2s ease;-webkit-tap-highlight-color:transparent;}
+  .deckarrow svg{width:26px;height:26px;stroke:var(--ink);fill:none;}
+  .deckarrow:active{opacity:.85;}
+  .deckarrow.up{top:0;}
+  .deckarrow.down{bottom:3px;}
+  body.no-arrows .deckarrow{display:none!important;}
 
   #fabs{position:absolute;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px) + 10px);z-index:11;display:flex;flex-direction:column;gap:9px;}
   .fab{width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--bg);border:none;
@@ -149,9 +157,9 @@
   .tabbar .tab .tabav{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#d9cfbd,#bfae94);border:1px solid var(--line);}
   .tabbar .tab.on{background:var(--lift);color:var(--gold);box-shadow:0 2px 8px rgba(42,35,32,.12);}
 
-  #sheetScrim{position:absolute;inset:0;background:rgba(42,35,32,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:30;}
+  #sheetScrim{position:absolute;inset:0;background:rgba(42,35,32,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:60;}
   #sheetScrim.open{opacity:1;pointer-events:auto;}
-  #sheet{position:absolute;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:22px 22px 0 0;
+  #sheet{position:absolute;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-radius:22px 22px 0 0;
     transform:translateY(101%);transition:transform .3s cubic-bezier(.34,1.06,.4,1);padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px));max-height:70%;overflow:auto;}
   #sheet.open{transform:translateY(0);}
   #sheet .grab{width:36px;height:4px;border-radius:4px;background:var(--line);margin:4px auto 12px;}
@@ -269,10 +277,10 @@
     </div>
     <div id="chipwrap"><div id="chiptrack"></div></div>
     <div id="feedZone"><div id="feed"></div>
+      <button class="deckarrow down" id="arrDown" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg></button>
     </div>
+    <button class="deckarrow up" id="arrUp" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg></button>
     <div class="tabbar"><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/></svg></span><span>Lens</span></button><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.6 19c0-3 2.5-5.2 5.4-5.2S14.4 16 14.4 19"/><circle cx="16.6" cy="7.6" r="2.4"/><path d="M15.6 13.3c2.3.1 4 2 4 4.2"/></svg></span><span>Friends</span></button><button class="tab on"><span class="tabav"></span><span>You</span></button><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9.4" cy="12" r="5.4"/><circle cx="14.6" cy="12" r="5.4"/></svg></span><span>Bonds</span></button><button class="tab"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="11" r="6.2"/><path d="M15 15.5l4.6 4.6"/><path d="M18.4 3.4l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></span><span>Discover</span></button></div>
-    <div id="sheetScrim"></div>
-    <div id="sheet"><div class="grab"></div><h3>Your Gemini Moon &middot; the reading</h3><div id="sheetList"></div></div>
   </div>
 
     <button id="aifab" aria-label="Ask The Pattern"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4L13.65 10.35 20.6 12 13.65 13.65 12 20.6 10.35 13.65 3.4 12 10.35 10.35Z"/><path d="M18.1 4.4Q18.1 6.7 20.4 6.7Q18.1 6.7 18.1 9Q18.1 6.7 15.8 6.7Q18.1 6.7 18.1 4.4Z"/></svg></button>
@@ -286,6 +294,9 @@
       </div>
       <div class="aiinput"><input placeholder="Ask anything about your Pattern…"><button class="aisend" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div>
     </div>
+
+  <div id="sheetScrim"></div>
+  <div id="sheet"><div class="grab"></div><h3>Your Gemini Moon &middot; the reading</h3><div id="sheetList"></div></div>
 
   <!-- LAYER 3 -->
   <div class="layer hidden" id="l3">
@@ -504,6 +515,7 @@ function measure(){
   const zoneH=H-headerH-topGap-tabbarH;
   cardH=Math.max(280,zoneH-peek);   // reserve room below for the deck peek
   feedZone.style.top=(headerH+topGap)+"px"; feedZone.style.height=zoneH+"px";
+  const au=$("#arrUp"); if(au) au.style.top=(headerH+2)+"px";
 }
 function buildFeed(){ measure(); renderDeck(); }
 function applyMode(){}
@@ -598,6 +610,8 @@ feedZone.addEventListener("wheel",e=>{                        // trackpad two-fi
   }
 },{passive:true});
 
+$("#arrUp").addEventListener("click",()=>advance(1));
+$("#arrDown").addEventListener("click",()=>advance(-1));
 document.addEventListener("keydown",e=>{
   if($("#l2").classList.contains("hidden")||$("#l3").classList.contains("show")) return;
   if(e.key==="ArrowUp") advance(1); else if(e.key==="ArrowDown") advance(-1);
@@ -606,12 +620,13 @@ document.addEventListener("keydown",e=>{
 
 /* insights sheet */
 const sheet=$("#sheet"), scrim=$("#sheetScrim");
-$("#chaptersBtn").addEventListener("click",()=>{
+function openSheet(){
   $("#sheetList").innerHTML=CARDS.map((c,i)=>{ const meta=c.type==="tout"?"Bond":c.type==="locked"?"Premium":c.type==="continue"?"Next":c.glyphs?"Transit":"Insight";
     return '<div class="sitem'+(i===focusIdx?' on':'')+'" data-j="'+i+'"><span class="n">'+(i+1)+'</span><span class="t">'+c.title+'<small>'+meta+'</small></span></div>'; }).join("");
-  $("#sheetList").querySelectorAll("[data-j]").forEach(el=>el.addEventListener("click",()=>{ closeSheet(); goTo(+el.dataset.j); }));
+  $("#sheetList").querySelectorAll("[data-j]").forEach(el=>el.addEventListener("click",()=>{ closeSheet(); if(!$("#l3").classList.contains("hidden")) hideL3(); goTo(+el.dataset.j); }));
   scrim.classList.add("open"); sheet.classList.add("open");
-});
+}
+$("#chaptersBtn").addEventListener("click",openSheet);
 function closeSheet(){ scrim.classList.remove("open"); sheet.classList.remove("open"); }
 scrim.addEventListener("click",closeSheet);
 
@@ -710,7 +725,7 @@ $("#searchBtn").addEventListener("click",()=>toast("Search coming soon"));
 $("#l1search").addEventListener("click",()=>toast("Search coming soon"));
 $("#l1av").addEventListener("click",()=>toast("Opens account menu"));
 $("#rsearch").addEventListener("click",()=>toast("Search coming soon"));
-$("#rchapters").addEventListener("click",()=>toast("Chapters coming soon"));
+$("#rchapters").addEventListener("click",openSheet);
 const TAB_MSG={ "Lens":"Opens Lens section, a daily feed of content", "Friends":"Opens the Friends section", "Bonds":"Opens the Bonds section", "Discover":"Opens 'Discover' smart search" };
 $$(".tab").forEach(b=>b.addEventListener("click",()=>{ const m=TAB_MSG[(b.lastElementChild.textContent||"").trim()]; if(m) toast(m); }));
 
@@ -726,8 +741,8 @@ $("#aiclose").addEventListener("click",closeAI);
 $("#aiscrim").addEventListener("click",closeAI);
 $$("#aipanel .aiprompt").forEach(b=>b.addEventListener("click",()=>{ toast("Would ask: "+b.textContent); closeAI(); }));
 $("#aipanel .aisend").addEventListener("click",()=>toast("Ask The Pattern"));
-// Journey-elliptical variant: arrows OFF (baked in).
-document.body.classList.add("no-arrows");
+// Test conditions: default shows the arrows; add #noarrows (or ?noarrows) to the URL for the arrows-off condition.
+if(/no[-_ ]?arrows/i.test(location.hash+location.search)) document.body.classList.add("no-arrows");
 
 /* ---------- landing: virtual-circle placement carousel ---------- */
 const PLACEMENTS=[
@@ -774,7 +789,7 @@ function buildEllipse(){
     '<div class="enode" data-e="'+i+'"><div class="ecirc">'+G(p.g.split(" ")[0])+'</div><div class="elabel">'+planetName(p).toUpperCase()+'</div></div>'
   ).join("");
   eEls=[...enw.querySelectorAll(".enode")];
-  eEls.forEach((el,i)=>el.addEventListener("click",()=>{ if(eMoved) return; spinCWto(i); }));
+  eEls.forEach((el,i)=>el.addEventListener("click",()=>{ if(eMoved) return; spinTo(i); }));
 }
 function eDelta(i){ const a=((center%NP)+NP)%NP; let d=i-a; while(d>NP/2)d-=NP; while(d<-NP/2)d+=NP; return d; }
 function updateEllipse(instant){
@@ -816,12 +831,19 @@ function advanceCenter(dir){
   updateEllipse();
 }
 function carGo(dir){ if(carBusy||eSpinning) return; carBusy=true; advanceCenter(dir); setTimeout(()=>{ carBusy=false; },340); }
-function spinCWto(i){                               // tap a node: roll the ring clockwise until it reaches the front
+function spinTo(i){                                 // tap a node: roll the short way (right->CW, left->CCW), constant speed
   if(carBusy||eSpinning) return;
-  const a=((center%NP)+NP)%NP; let k=((i-a)%NP+NP)%NP;
-  if(!k) return;
+  const cw=((i-center)%NP+NP)%NP; if(!cw) return;
+  const dir=(cw<=NP/2)?1:-1, total=(cw<=NP/2)?cw:NP-cw;
   eSpinning=true;
-  const tick=()=>{ advanceCenter(1); if(--k>0) setTimeout(tick,120); else eSpinning=false; };
+  eEls.forEach(el=>el.style.transition="transform 140ms linear, opacity 140ms linear");   // linear = no per-step ease jitter
+  carCards.forEach(el=>el.style.transition="transform 140ms linear");
+  let k=total;
+  const tick=()=>{
+    advanceCenter(dir);
+    if(--k>0) setTimeout(tick,110);
+    else { eSpinning=false; setTimeout(()=>{ eEls.forEach(el=>el.style.transition=""); carCards.forEach(el=>el.style.transition=""); },160); }
+  };
   tick();
 }
 /* swipe (touch) + two-finger trackpad (wheel deltaX); tap a card to drill in */
