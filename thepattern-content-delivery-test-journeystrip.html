@@ -807,7 +807,7 @@ function carGo(dir){
   const prev=center, nc=center+dir;
   carCards.forEach((el,i)=>{
     const oldOff=wrapOff(i-center), newOff=wrapOff(i-nc);
-    if(Math.abs(newOff-oldOff)>1){                 // this card recycles to the far other side (off-screen): move it instantly
+    if(Math.abs(newOff-oldOff)>NP/2){             // only a true wrap-around jumps; multi-slot moves still glide
       el.style.transition="none"; el.style.transform="translateX("+slotX(newOff)+"px)"; el.offsetWidth; el.style.transition="";
     } else {                                        // visible cards glide one slot
       el.style.transform="translateX("+slotX(newOff)+"px)";
