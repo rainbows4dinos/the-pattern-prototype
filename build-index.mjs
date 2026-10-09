@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
   Regenerates the card list in index.html from metadata in each prototype file.
-  Run with `npm run proto`. Zero dependencies.
+  Run with `node build-index.mjs` from this folder. Zero dependencies.
 
   Each prototype may carry a block near the top of the file:
 
@@ -31,8 +31,8 @@
   Only the markup between <!-- prototypes:start --> and <!-- prototypes:end -->
   is touched. The thumbnail script in index.html mounts each iframe at runtime by
   reading the href off the enclosing <a>, so cards emit .thumb empty — no src and
-  no data attributes. hrefs are absolute and extensionless to match the host's
-  cleanUrls rewrite.
+  no data attributes. hrefs are relative (<file>.html), so the folder works as-is
+  on GitHub Pages at any repo path, or opened locally.
 */
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -41,15 +41,14 @@ const DIR = import.meta.dirname;
 const INDEX = join(DIR, "index.html");
 const START = "<!-- prototypes:start -->";
 const END = "<!-- prototypes:end -->";
-const URL_BASE = "/static-prototypes/";
 const GROUP_FALLBACK = "Archive";
 
 // Section subtitles, so generated headings keep the wording they had by hand.
 // The <h2> markup is otherwise identical to the template it was copied from.
-const GROUP_SUBTITLES = { "Your Journey": "— Interaction Tests" };
+const GROUP_SUBTITLES = { "You Page": "— User Tests", "Your Journey": "— Interaction Tests" };
 
 // Groups render in this order; anything else follows, alphabetically.
-const GROUP_ORDER = ["Your Journey"];
+const GROUP_ORDER = ["You Page", "Your Journey"];
 
 const escapeHtml = (s) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -115,7 +114,7 @@ const byOrder = (a, b) => a.order - b.order || a.file.localeCompare(b.file);
 function card(p, pad) {
   return [
     `${pad}<li>`,
-    `${pad}  <a class="item" href="${URL_BASE}${escapeHtml(p.slug)}">`,
+    `${pad}  <a class="item" href="${escapeHtml(p.file)}">`,
     `${pad}    <div class="thumb"><span class="placeholder">Preview</span></div>`,
     `${pad}    <div class="label">`,
     `${pad}      <div class="name">${escapeHtml(p.title)}</div>`,

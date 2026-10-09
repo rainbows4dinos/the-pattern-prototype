@@ -159,8 +159,6 @@
       /* Collapsed groups shouldn't leave the 5rem gap the open grid carries. */
       details.group:not([open]) { margin-bottom: 1.5rem; }
       details.group > ul { margin-bottom: 3rem; }
-      footer { color: var(--muted); font-size: 0.8125rem; margin-top: 2.5rem; }
-      footer a { color: inherit; }
     </style>
   </head>
   <body>
@@ -169,13 +167,13 @@
       <p class="lede">Standalone HTML sketches. Self-contained — no build step, no React.</p>
       <!--
         The cards below are GENERATED. Everything between prototypes:start and
-        prototypes:end is rewritten by `npm run proto` (build-index.mjs) — edit
+        prototypes:end is rewritten by `node build-index.mjs` — edit
         it by hand and your changes are lost on the next run.
 
         To add a prototype: drop its .html in this folder, give it a "prototype"
         metadata block near the top — copy the one at the end of the <head> in
         spiral-v4-with-node-content-v7.html, which sets title, group, round and
-        order — then run `npm run proto`.
+        order — then run `node build-index.mjs`.
 
         group is the <h2> section; round is the collapsible <details> subsection
         inside it. Rounds render newest-first off the leading number in the
@@ -184,7 +182,7 @@
         back to Archive, and a missing order sorts last within its round. Field
         reference lives in the header comment of build-index.mjs.
         Anything outside the markers — this comment, the styles, the thumbnail
-        script, the footer — is left alone by the generator.
+        script — is left alone by the generator.
       -->
       <!-- prototypes:start -->
       <details class="section" open>
@@ -193,7 +191,7 @@
           <summary><h3>Journey Placements Content Delivery</h3></summary>
           <ul>
             <li>
-              <a class="item" href="/static-prototypes/thepattern-content-delivery-test-journeyelliptical">
+              <a class="item" href="thepattern-content-delivery-test-journeyelliptical.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery Test -- Journey Elliptical</div>
@@ -202,7 +200,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/thepattern-content-delivery-test-journeystrip">
+              <a class="item" href="thepattern-content-delivery-test-journeystrip.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery Test -- Journey Strip</div>
@@ -211,7 +209,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/thepattern-content-delivery-test-noarrows">
+              <a class="item" href="thepattern-content-delivery-test-noarrows.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery Test -- No Arrows</div>
@@ -220,7 +218,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/thepattern-content-delivery-test-arrows">
+              <a class="item" href="thepattern-content-delivery-test-arrows.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery Test -- With Arrows</div>
@@ -229,19 +227,16 @@
               </a>
             </li>
           </ul>
-          </summary>
-        </details>  
-
-
-        </summary>
+        </details>
       </details>
+
       <details class="section" open>
         <summary><h2>Your Journey <span class="count">— Interaction Tests</span></h2></summary>
         <details class="group" open>
           <summary><h3>RD5 Explorations: Content Delivery Systems</h3></summary>
           <ul>
             <li>
-              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v4">
+              <a class="item" href="pattern-3layer-stacked-deck-v4.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">⭐️ LATEST: Content Delivery System -- Stacked Cards Approach v4 (vertical)</div>
@@ -250,7 +245,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v3">
+              <a class="item" href="pattern-3layer-stacked-deck-v3.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery System -- Stacked Cards Approach V3 (horizontal)</div>
@@ -259,7 +254,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck-v2">
+              <a class="item" href="pattern-3layer-stacked-deck-v2.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery System -- Stacked Cards Approach V2</div>
@@ -268,7 +263,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/pattern-3layer-stacked-deck">
+              <a class="item" href="pattern-3layer-stacked-deck.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery System -- Stacked Cards Approach</div>
@@ -277,7 +272,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/pattern-content-delivery-views">
+              <a class="item" href="pattern-content-delivery-views.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery System -- Refined Direction</div>
@@ -286,7 +281,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/pattern-3layer-middle">
+              <a class="item" href="pattern-3layer-middle.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery System - Middle Path, Feeder Refined</div>
@@ -295,7 +290,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/pattern-3layer-noscroll">
+              <a class="item" href="pattern-3layer-noscroll.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery System - No Scroll v2</div>
@@ -304,7 +299,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/pattern-3layer-feeder">
+              <a class="item" href="pattern-3layer-feeder.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Content Delivery System - Feeder &amp; Reader v2</div>
@@ -318,7 +313,7 @@
           <summary><h3>RD4 Explorations: Refine the Spiral</h3></summary>
           <ul>
             <li>
-              <a class="item" href="/static-prototypes/spiral-adjustment-opt2">
+              <a class="item" href="spiral-adjustment-opt2.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Spiral Refinement - Option 2</div>
@@ -327,7 +322,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/spiral-adjustment-opt1">
+              <a class="item" href="spiral-adjustment-opt1.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Spiral Refinement - Option 1</div>
@@ -341,7 +336,7 @@
           <summary><h3>RD3 Explorations: Dive Deeper Into the Spiral</h3></summary>
           <ul>
             <li>
-              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v7">
+              <a class="item" href="spiral-v4-with-node-content-v7.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">⭐️ Dive Deeper Into the Spiral - v7 (LATEST)</div>
@@ -350,7 +345,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v6">
+              <a class="item" href="spiral-v4-with-node-content-v6.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Dive Deeper Into the Spiral - v6</div>
@@ -359,7 +354,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v5">
+              <a class="item" href="spiral-v4-with-node-content-v5.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Dive Deeper Into the Spiral - v5</div>
@@ -368,7 +363,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v4">
+              <a class="item" href="spiral-v4-with-node-content-v4.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Dive Deeper Into the Spiral - v4</div>
@@ -377,7 +372,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v3">
+              <a class="item" href="spiral-v4-with-node-content-v3.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Dive Deeper Into the Spiral - v3</div>
@@ -386,7 +381,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v2">
+              <a class="item" href="spiral-v4-with-node-content-v2.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Dive Deeper Into the Spiral - v2 (THIS ONE!)</div>
@@ -395,7 +390,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/spiral-v4-with-node-content-v1">
+              <a class="item" href="spiral-v4-with-node-content-v1.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Dive Deeper Into the Spiral - v1</div>
@@ -404,7 +399,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/mars-node-v4">
+              <a class="item" href="mars-node-v4.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Dive Into Mars - First Pass</div>
@@ -418,7 +413,7 @@
           <summary><h3>RD2 Explorations: Refining the Spiral Journey</h3></summary>
           <ul>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-spiral-v4">
+              <a class="item" href="your-journey-spiral-v4.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">⭐️ Journey Spiral 004</div>
@@ -427,7 +422,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-spiral-v3">
+              <a class="item" href="your-journey-spiral-v3.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Journey Spiral 003</div>
@@ -436,7 +431,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-spiral-v2">
+              <a class="item" href="your-journey-spiral-v2.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Journey Spiral 002</div>
@@ -445,7 +440,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-spiral">
+              <a class="item" href="your-journey-spiral.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Journey Spiral 001</div>
@@ -459,7 +454,7 @@
           <summary><h3>RD1 Explorations: Finding the Shape</h3></summary>
           <ul>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-unwind-2">
+              <a class="item" href="your-journey-unwind-2.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Full Circle Unwind to Spiral v2</div>
@@ -468,7 +463,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-unwind">
+              <a class="item" href="your-journey-unwind.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Full Circle Unwind to Spiral</div>
@@ -477,7 +472,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-circle">
+              <a class="item" href="your-journey-circle.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Full Circle</div>
@@ -486,7 +481,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-horizon">
+              <a class="item" href="your-journey-horizon.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Horizon</div>
@@ -495,7 +490,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-spiral">
+              <a class="item" href="your-journey-spiral.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">⭐️ Spiral</div>
@@ -504,7 +499,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/your-journey-conveyor">
+              <a class="item" href="your-journey-conveyor.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Conveyor — Second Pass</div>
@@ -513,7 +508,7 @@
               </a>
             </li>
             <li>
-              <a class="item" href="/static-prototypes/the-pattern-conveyor-strip-RD1">
+              <a class="item" href="the-pattern-conveyor-strip-RD1.html">
                 <div class="thumb"><span class="placeholder">Preview</span></div>
                 <div class="label">
                   <div class="name">Conveyor - First Past</div>
@@ -529,7 +524,7 @@
         <summary><h2>Archive</h2></summary>
         <ul>
           <li>
-            <a class="item" href="/static-prototypes/the-pattern-3d-chart">
+            <a class="item" href="the-pattern-3d-chart.html">
               <div class="thumb"><span class="placeholder">Preview</span></div>
               <div class="label">
                 <div class="name">The Pattern — 3D Natal Chart</div>
@@ -537,10 +532,18 @@
               </div>
             </a>
           </li>
+          <li>
+            <a class="item" href="thepattern-content-delivery-test-journeytapered.html">
+              <div class="thumb"><span class="placeholder">Preview</span></div>
+              <div class="label">
+                <div class="name">Your Pattern — vertical deck</div>
+                <div class="file">thepattern-content-delivery-test-journeytapered.html</div>
+              </div>
+            </a>
+          </li>
         </ul>
       </details>
       <!-- prototypes:end -->
-      <footer>&larr; <a href="/">Back to the React prototype</a></footer>
     </main>
 
     <script>
